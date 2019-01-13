@@ -1,11 +1,10 @@
 classdef EntropyProjector < LinearProjectorInterface
     
-    properties
-    end
 
-    methods(Abstract)
+
+    methods
         
-        soln = project(self, prox_param, prox_center, grad)
+        function soln = project(self, prox_param, prox_center, grad)
         % solves min <x, grad>  + U(prox_center, x) * 
                 
         

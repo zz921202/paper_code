@@ -2,10 +2,11 @@ classdef RandomVectorGeneratorInterface
     methods(Abstract)
         v = generateVector(self, n)
         vs = generateVectors(self, n, k)
+        % vs = {} with k element vectors
     end
-    
+
     methods (Access = protected)
-        function mat =rand_matrix(obj, m, n, start_val, end_val)
+        function mat =randMatrix(obj, m, n, start_val, end_val)
             eig_lower_bound = 1;
             eig_upper_bound = 10;
             k = min(m, n);
@@ -18,9 +19,7 @@ classdef RandomVectorGeneratorInterface
             end
             
         end 
-    end
-    
-    methods (Access = private)
+
          function vec = helper_rand_vec(obj, m,  start_val, end_val) 
             vec = rand(m, 1) * (end_val - start_val) + start_val;
         end 

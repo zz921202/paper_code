@@ -7,7 +7,7 @@ classdef RandomMatrixGeneratorInterface
     end
 
     methods (Access = protected)
-        function mat =rand_matrix(obj, m, n, start_val, end_val)
+        function mat =randMatrix(obj, m, n, start_val, end_val)
             eig_lower_bound = 1;
             eig_upper_bound = 10;
             k = min(m, n);
@@ -20,9 +20,9 @@ classdef RandomMatrixGeneratorInterface
             end
             
         end 
-    end
     
-    methods (Access = private)
+    
+    
          function vec = helper_rand_vec(obj, m,  start_val, end_val) 
             vec = rand(m, 1) * (end_val - start_val) + start_val;
         end 
