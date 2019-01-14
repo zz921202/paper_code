@@ -1,6 +1,6 @@
 classdef NumHandle < handle
    properties
-      Number = 1
+      
    end
 
    methods
@@ -8,5 +8,8 @@ classdef NumHandle < handle
             disp('hello world')
         end
 
+        function hi(self)
+            self.Number
+        end
    end
 end

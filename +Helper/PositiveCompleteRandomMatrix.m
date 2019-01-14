@@ -3,12 +3,18 @@ classdef PositiveCompleteRandomMatrix < Helper.RandomMatrixGeneratorInterface
         UPPERBOUND = 100
     end
     methods
-        function Tks = generateTechMatrices(self, m, n, k)
+        function [Tks, Mt] = generateTechMatrices(self, m, n, k)
             Tks = {};
+            Mt = 0;
+
             for ind = 1: k
-                TKs = [Tks, self.randMatrix(m, n, 0, self.UPPERBOUND)];
+
+                [TKs, cur_mt] = [Tks, self.randMatrix(m, n, 0, self.UPPERBOUND)];
+                Mt = max(cur_mt, Mt);
             end
         end
+
+
 
         function Wks = generateRecourseMatrices(self, m, n, k)
             if n < 2 * m

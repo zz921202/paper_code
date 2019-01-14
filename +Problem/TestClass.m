@@ -1,6 +1,6 @@
-classdef TestClass < handle
+classdef TestClass < Problem.NumHandle
    properties
-      Number = 1
+      Number = 2
    end
 
    methods

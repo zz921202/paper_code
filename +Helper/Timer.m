@@ -7,11 +7,11 @@ classdef Timer < handle
             self.time_elapsed = 0;
         end
 
-        function startTimer(self)
+        function start(self)
             tic;
         end
 
-        function endTimer(self)
+        function pause(self)
             t = toc;
             self.time_elapsed = self.time_elapsed + t;
         end

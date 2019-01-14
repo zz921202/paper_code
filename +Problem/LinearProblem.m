@@ -18,6 +18,9 @@ classdef LinearProblem < Problem.ProblemDataInterface
         m = 0;
         n = 0;
         k = 0;
+        Mt;
+        cp;
+        
 
     end
 
@@ -31,7 +34,7 @@ classdef LinearProblem < Problem.ProblemDataInterface
             param_str = sprintf("%d scenarios with %d rows and %d columns", k, m, n);
             self.k, self.m, self.n = k, m, n;
             disp("Generating Example with "+ param_str);
-            Tks = self.randomMatrixGenerator.generateTechMatrices(m,n,k);
+            [Tks, self.Mt] = self.randomMatrixGenerator.generateTechMatrices(m,n,k);
             Wks = self.randomMatrixGenerator.generateRecourseMatrices(m, n, k);
             A = self.randomMatrixGenerator.generateAMatrix(m, n);
             b = self.randomVectorGenerator.generateVector(m);
@@ -54,9 +57,9 @@ classdef LinearProblem < Problem.ProblemDataInterface
             self.generatePData(k);
 
             myTimer = Helper.timer();
-            myTimer.startTimer();
+            myTimer.start();
             self.opt_val = self.getReferenceObjective();
-            myTimer.endTimer();
+            myTimer.pasue();
             time_elapsed = myTimer.getTime();
             disp(sprintf('Optimal Objective is %s computed in %s sceonds', num2str(self.opt_val), num2str(time_elapsed)));            
         end
@@ -127,6 +130,10 @@ classdef LinearProblem < Problem.ProblemDataInterface
             first_stage_cost = x' * self.c;
             objective_val = second_stage_cost + first_stage_cost;
             gap = objective_val - self.opt_val;
+        end
+
+        function Mt = getMt(self)
+            self.Mt;
         end
 
     end

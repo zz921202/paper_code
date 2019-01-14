@@ -9,18 +9,19 @@ classdef LinearRatioUncertainty < Problem.LinearProblem
     methods
 
         function self = LinearRatioUncertainty(randomMatrixGenerator, randomVectorGenerator, projector_name)
-            % projector name: entropy, custom, euclidean
+            % projector name: Entropy,  Euclidean, BoxEntropy, BoxEuclidean
             self@Problem.LinearProblem(randomMatrixGenerator, randomVectorGenerator);
-            self.p_projector = Helper.EuclideanProjector();
+            
             if projector_name == "Entropy"
                 self.p_projector = Helper.EntropyProjector();
             elseif projector_name == "Euclidean"
                 self.p_projector = Helper.EuclideanProjector();
             elseif projector_name == "BoxEntropy"
                 self.box_projector = Helper.BoxPProjector.BoxPEntropyProjector();
-                
+                self.p_projector = Helper.EntropyProjector();
             elseif projector_name == "BoxEuclidean"
                 self.box_projector = Helper.BoxPProjector.BoxPEuclideanProjector();
+                self.p_projector = Helper.EuclideanProjector();
             else
                 error('Please choose projector from "Entropy| Euclidean| BoxEntropy| BoxEuclidean"');
             end
@@ -72,11 +73,20 @@ classdef LinearRatioUncertainty < Problem.LinearProblem
             init_p = self.reference_p;
         end
 
-        function next_p = projectP(self, prox_param, prox_center, grad)
+        function next_p = projectP(self, prox_param, prox_center, x, pis)
+            indi_costs = zeros(1, self.k);
+            for ind = 1: self.k
+                cur_pi_projector = self.pi_projectors{ind};
+                grad = self.Tks{ind} * x + self.dks{ind};
+                                cur_cost = (pis{ind})' * grad;
+                indi_costs(ind) = cur_cost;
+            end
+
+
             if self.custom_projector
-                next_p = self.fast_PProject(stepsize, prox_center, -grad);
+                next_p = self.fast_PProject(prox_param, prox_center, -indi_costs);
             else
-                next_p = self.p_projector.project(prox_param, prox_center, -grad);
+                next_p = self.p_projector.project(prox_param, prox_center, -indi_costs);
             end
         end
 
