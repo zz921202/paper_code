@@ -27,8 +27,8 @@ classdef FOAlgoritm < handle
 
         Mt;
         cp;
-        conservative_p_radius;
-        conservative_pi_radius;
+        conservative_p_breg_dist; 
+        conservative_pi_breg_dist;
 
     end
 
@@ -51,11 +51,13 @@ classdef FOAlgoritm < handle
         end
 
         function self = FOAlgorithm(self, problem_data, terminator)
-            self.problem_data = problem_data; % problem 
             terminator.setFOAlgorithm(terminator);
             self.terminator = terminator;
-            self.problem_data.getCP();
-            self.problem_data.getMt();
+            self.problem_data = problem_data; % problem 
+            self.cp = problem_data.getCP();
+            self.Mt = problem_data.getMt();
+            self.conservative_p_breg_dist = problem_data.getConservativePBregDist();
+            self.conservative_pi_breg_dist = problem_data.getConservativePiBregDist();
             % counting param choices will be initialized in the subclass
         end
 

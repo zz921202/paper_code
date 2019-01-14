@@ -5,6 +5,7 @@ classdef NestrovTypeAlgorithm < Algorithm.FOAlgorithm
         omega_x_estimates = [10, 100, 1000, 10000];
         cur_omega_p;
         cur_omega_pi;
+        cur_M_pi;
         cur_omega_x;
         cur_x_temp; %xt while cur_x refers to the accumulated a.k.a x_bar
 
@@ -25,6 +26,7 @@ classdef NestrovTypeAlgorithm < Algorithm.FOAlgorithm
             self.cur_omega_x = self.omega_x_estimates(x_choice);
             self.cur_omega_p = self.omega_p_ratios(p_choice) * sqrt(self.problem_data.getConservativePBregDist());
             self.cur_omega_pi = self.omega_pi_ratios(pi_choice) * sqrt(self.problem_data.getConservativePiBregDist());
+            self.cur_M_pi = sqrt(2) * self.cur_omega_pi;% CHEATING, valid only when smooth_pi = 0
         end
 
         function str = showGridParam(self, index)
