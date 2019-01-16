@@ -8,8 +8,8 @@ classdef PositiveCompleteRandomMatrix < Helper.RandomMatrixGeneratorInterface
             Mt = 0;
 
             for ind = 1: k
-
-                [TKs, cur_mt] = [Tks, -self.randMatrix(m, n, 0, self.UPPERBOUND)];
+                [cur_mat, cur_mt] = self.randMatrixWithEig(m, n, 0, self.UPPERBOUND);
+                TKs = [Tks, -cur_mat];
                 Mt = max(cur_mt, Mt);
             end
         end

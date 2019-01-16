@@ -107,7 +107,7 @@ classdef LinearProblem < Problem.ProblemDataInterface
                 addtional_cost = additional_cost + (self.dks{ind})' * pis{ind} * p(ind);
             end
             overall_grad = self.c + second_stage_grad;
-            [x, total_cost] = self.x_projector.solve(overall_grad);
+            [total_cost, x] = self.x_projector.solve(overall_grad);
             
         end
 
@@ -139,6 +139,41 @@ classdef LinearProblem < Problem.ProblemDataInterface
             A = self.x_projector.model.A;
             b = self.x_projector.model.b;
         end
+
+        function cp = getCp(self)
+            if self.p_projector.getDistanceName() == 'Entropy':
+                cp = 1;
+            elseif self.p_projector.getDistanceName() == "Euclidean":
+                cp = sqrt(k);
+            else
+                error('Unknown p_projector, please compute cp beforehand');
+            end
+        end
+
+        function dist_est = getConservativePiBregDist(self)
+            ext_vecs = {};
+            for ind = 1: self.k
+                cur_ek = self.eks{ind};
+                cur_ext_vec = cur_ek[1: self.m] - cur_ek[self.m + 1: 2 * self.m];
+                ext_vecs = [ext_vecs, cur_ext_vec];
+            end
+            dist_est = Helper.computeMaxL2norm2(ext_vecs);
+        end
+
+        function Mt = getMt(self)
+            Mt = self.Mt;
+        end
+
+        function p_dist_est = getConservativePBrefDist(self)
+            if self.p_projector.getDistanceName() == 'Entropy':
+                p_dist_est = log(self.k)
+            elseif self.p_projector.getDistanceName() == "Euclidean":
+                p_dist_est = 1;
+            else
+                error('Unknown p_projector, please compute cp beforehand');
+            end
+        end
+
 
     end
     methods(Abstract)

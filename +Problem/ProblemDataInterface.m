@@ -36,10 +36,10 @@ classdef ProblemDataInterface
         [A, b] = getXConstraint(self)
 
         %TODO 
-        getCP(self) % get it from p projector
+        cp = getCP(self) % get it from p projector
         getConservativePBregDist(self)
-        getConservativePiBregDist(self)
-        getMt(self)
+        dist_est = getConservativePiBregDist(self)
+        mt = getMt(self)
         % getPRatio(self)
 
     end

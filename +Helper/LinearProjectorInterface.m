@@ -4,6 +4,7 @@ classdef LinearProjectorInterface < handle
         model=[];
         m;
         n;
+
     end
     methods
         % solves min <grad, x>
@@ -27,7 +28,8 @@ classdef LinearProjectorInterface < handle
 
     methods(Abstract)
         
-        [soln, val] = project(prox_param, prox_center, grad)
+        [soln, val] = project(self,prox_param, prox_center, grad)
+        str = getDistanceName(self)
         % solves min <x, grad>  + U(prox_center, x) * prox_param
     end
 end

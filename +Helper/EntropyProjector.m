@@ -1,6 +1,6 @@
 classdef EntropyProjector < LinearProjectorInterface
     
-
+    
 
     methods
         
@@ -14,8 +14,13 @@ classdef EntropyProjector < LinearProjectorInterface
                 subject to 
                     self.model.A * p >= self.model.rhs
             cvx_end
-            
+
             soln = p;
             obj = cvx_optval;
         end
+
+        function str =getDistanceName(self)
+            str = 'Entropy';
+        end
+    end
 end

@@ -11,6 +11,10 @@ classdef EuclideanProjector < LinearProjectorInterface
                 obj = res.objval;
 
         end
+
+        function str =getDistanceName(self)
+            str = 'Euclidean';
+        end
     end
 
 end
