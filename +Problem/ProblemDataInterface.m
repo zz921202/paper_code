@@ -40,6 +40,7 @@ classdef ProblemDataInterface
         getConservativePBregDist(self)
         getConservativePiBregDist(self)
         getMt(self)
+        % getPRatio(self)
 
     end
 end

@@ -30,7 +30,7 @@ classdef FOAlgoritm < handle
         conservative_p_breg_dist; 
         conservative_pi_breg_dist;
         smooth_pis;
-        smooth_p
+        smooth_p;
     end
 
     methods
@@ -57,6 +57,7 @@ classdef FOAlgoritm < handle
             self.time_history = [self.timer_history; self.time_elasped];
             [self.cur_obj, self.cur_true_gap] = self.problem_data.evalX(self.cur_x);
             self.obj_history = [self.obj_history; self.cur_obj];
+            self.num_iters = self.num_iters + 1;
         end
 
         function self = FOAlgorithm(self, problem_data, terminator)
