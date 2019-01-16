@@ -14,7 +14,7 @@ classdef LinearProblem < Problem.ProblemDataInterface
         dks = {};
         A = [];
         b = [];
-        c = [];
+        
         m = 0;
         n = 0;
         k = 0;
@@ -64,26 +64,25 @@ classdef LinearProblem < Problem.ProblemDataInterface
             disp(sprintf('Optimal Objective is %s computed in %s sceonds', num2str(self.opt_val), num2str(time_elapsed)));            
         end
 
-        function next_x = projectX(self, prox_param, prox_center, p, pis)
+        function [next_x, total_cost] = projectX(self, prox_param, prox_center, secon_grad)
             % solves the following problem 
             %  min    stepsize * <grad, x> + V(prox_center, x)
             %  x in X
-            second_stage_grad = zeros(self.n, 1);
-            for ind = 1: self.k
-                second_stage_grad = second_stage_grad + p(ind) * (self.Tks{ind})' * pis{ind};
-            end
-            overall_grad = self.c + second_stage_grad;
-            next_x = self.x_projector.project(prox_param, prox_center, overall_grad);
+            overall_grad = self.c + secon_grad;
+            [next_x, total_cost] = self.x_projector.project(prox_param, prox_center, overall_grad);
+            
         end
 
-        function next_pis = projectPis(self, prox_param, prox_centers, x)
+        function [next_pis, indi_costs] = projectPis(self, prox_param, prox_centers, x)
             %   returns all pis
             next_pis = {};
+            indi_costs = [];
             for ind = 1: self.k
                 cur_grad = self.Tks{ind} * x + self.dks{ind};
                 cur_projector = self.pi_projectors{ind};
-                cur_next_pi = cur_projector.project(prox_param, prox_centers{ind}, -cur_grad);
+                [cur_next_pi, neg_cost] = cur_projector.project(prox_param, prox_centers{ind}, -cur_grad);
                 next_pis = [next_pis, cur_next_pi];
+                indi_costs = [indi_costs; -neg_cost];
             end
         end
 
@@ -108,8 +107,8 @@ classdef LinearProblem < Problem.ProblemDataInterface
                 addtional_cost = additional_cost + (self.dks{ind})' * pis{ind} * p(ind);
             end
             overall_grad = self.c + second_stage_grad;
-            [total_cost, x] = self.x_projector.project(prox_param, prox_center, overall_grad);
-            total_cost = total_cost + additional_cost;
+            [x, total_cost] = self.x_projector.solve(overall_grad);
+            
         end
 
         function [indi_costs, pis] = solveForPis(self, x)
@@ -136,6 +135,11 @@ classdef LinearProblem < Problem.ProblemDataInterface
             self.Mt;
         end
 
+        function [A, b] = getXConstraint(self)
+            A = self.x_projector.model.A;
+            b = self.x_projector.model.b;
+        end
+
     end
     methods(Abstract)
         %% handles projection
@@ -152,7 +156,7 @@ classdef LinearProblem < Problem.ProblemDataInterface
         % init_x = getInitialX(self)
 
         init_p = getInitialP(self)
-        next_p = projectP(self, prox_param, prox_center, grad)
+        [next_p, secon_cost, secon_grad] = projectP(self, prox_param, prox_center, grad)
         generatePData(self, k)
         [total_cost, p] = solveForP(self, individual_costs)
         optimal_val = getReferenceObjective(self)

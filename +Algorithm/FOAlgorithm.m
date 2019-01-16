@@ -29,7 +29,8 @@ classdef FOAlgoritm < handle
         cp;
         conservative_p_breg_dist; 
         conservative_pi_breg_dist;
-
+        smooth_pis;
+        smooth_p
     end
 
     methods
@@ -50,6 +51,14 @@ classdef FOAlgoritm < handle
 
         end
 
+        function recordObjTime(self)
+            %record down all info
+            self.time_elapsed = self.mytimer.getTime();
+            self.time_history = [self.timer_history; self.time_elasped];
+            [self.cur_obj, self.cur_true_gap] = self.problem_data.evalX(self.cur_x);
+            self.obj_history = [self.obj_history; self.cur_obj];
+        end
+
         function self = FOAlgorithm(self, problem_data, terminator)
             terminator.setFOAlgorithm(terminator);
             self.terminator = terminator;
@@ -59,6 +68,9 @@ classdef FOAlgoritm < handle
             self.conservative_p_breg_dist = problem_data.getConservativePBregDist();
             self.conservative_pi_breg_dist = problem_data.getConservativePiBregDist();
             % counting param choices will be initialized in the subclass
+            self.smooth_pis = problem_data.getInitialPis();
+            k = self.problem_data.k;
+            smooth_p = 1/k * ones(k, 1);
         end
 
         function flag = nextGridParam(self)
@@ -70,6 +82,7 @@ classdef FOAlgoritm < handle
                 return 
             end
             self.setGridParam(self.param_counter);
+            self.showGridParam(self.para_counter);
         end
 
     end

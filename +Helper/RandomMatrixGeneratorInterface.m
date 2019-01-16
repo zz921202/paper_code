@@ -1,7 +1,7 @@
 classdef RandomMatrixGeneratorInterface
 
     methods(Abstract)
-        [Mt, Tks] = generateTechMatrices(self, m, n, k)
+        [Mt, Tks] = generateTechMatrices(self, m, n, k)%Tks should be negative in our formulation 
         Wks = generateRecourseMatrices(self, m, n, k)
         A = generateAMatrix(self, m, n)
     end

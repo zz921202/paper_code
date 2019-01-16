@@ -31,6 +31,10 @@ classdef BoxPEuclideanProjector < Helper.BoxPEntropyProjector.BoxPEntropyProject
             lam = (target - base) * self.prox_param/num_active_terms;
         end
 
+        function objective = computeCost(self, prox_param, prox_center, grad, p)
+            objective = grad' * p + prox_param * 1/2 * norm(p - prox_center);
+        end
+
     end
 
 end

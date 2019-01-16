@@ -27,7 +27,7 @@ classdef LinearProjectorInterface < handle
 
     methods(Abstract)
         
-        soln = project(prox_param, prox_center, grad)
+        [soln, val] = project(prox_param, prox_center, grad)
         % solves min <x, grad>  + U(prox_center, x) * prox_param
-        end
+    end
 end

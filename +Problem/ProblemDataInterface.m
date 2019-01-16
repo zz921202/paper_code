@@ -1,17 +1,21 @@
 classdef ProblemDataInterface 
-    properties(Access = protected)
-        RefObjective
+    properties
+        RefObjective;
+        m = 0;
+        n = 0;
+        k = 0;
+        c = [];
     end
 
     methods(Abstract)
         %% handles projection grad 
-        next_x = projectX(self, prox_param, prox_center, p, pis)
+        [next_x, total_cost] = projectX(self, prox_param, prox_center, secon_grad)
             % solves the following problem 
             %  min    stepsize * <grad, x> + prox_param * V(prox_center, x)
             %  x in X
-        next_p = projectP(self, prox_param, prox_center, x, pis)
-        next_pis = projectPis(self, prox_param, prox_centers, x)
-            %   returns all pis
+        [next_p, secon_grad, secon_cost] = projectP(self, prox_param, prox_center, indi_costs, pis)
+        [next_pis, indi_costs] = projectPis(self, prox_param, prox_centers, x)
+            %   returns all pis CONVERSION to min problem carried out inside the function
 
         %% handles evaluation, quality of solution 
         optimal_val = getReferenceObjective(self)
@@ -29,11 +33,13 @@ classdef ProblemDataInterface
         init_x = getInitialX(self)
         init_p = getInitialP(self)
         init_pis = getInitialPis(self)
+        [A, b] = getXConstraint(self)
 
         %TODO 
         getCP(self) % get it from p projector
         getConservativePBregDist(self)
         getConservativePiBregDist(self)
         getMt(self)
+
     end
 end

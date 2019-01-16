@@ -31,6 +31,10 @@ classdef BoxPEntropyProjector < Helper.BoxPEntropyProjector.BoxPEntropyProjector
             lam = log(real_target / base) * self.prox_param;
         end
 
+        function objective = computeCost(self, prox_param, prox_center, grad, p)
+            objective = grad' * p + prox_param * ((p + self.DELTA)' * log(p + self.DELTA) - (p + self.DELTA)' * log(prox_center + self.DELTA));
+        end
+
     end
 
 end

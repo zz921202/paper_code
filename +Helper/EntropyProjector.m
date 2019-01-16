@@ -4,7 +4,7 @@ classdef EntropyProjector < LinearProjectorInterface
 
     methods
         
-        function soln = project(self, prox_param, prox_center, grad)
+        function [soln, obj] = project(self, prox_param, prox_center, grad)
         % solves min <x, grad>  + U(prox_center, x) * 
                 
         
@@ -12,9 +12,10 @@ classdef EntropyProjector < LinearProjectorInterface
                 variable p(self.n)
                 minimize( grad' * p + ones(1, obj.k) * (kl_div(prev_p, p)) * prox_param)
                 subject to 
-                    self.model.A * p >= self.model.rhs;
+                    self.model.A * p >= self.model.rhs
             cvx_end
-            soln = p
-
+            
+            soln = p;
+            obj = cvx_optval;
         end
 end

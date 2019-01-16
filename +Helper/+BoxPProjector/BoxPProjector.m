@@ -20,7 +20,7 @@ classdef BoxPProjector < handle
             self.p_components = p_components;
         end
         
-        function p = project(self, prox_param, prox_center, grad)
+        function [p, objective] = project(self, prox_param, prox_center, grad)
             % solves min <grad, p> + prox_param * U(prox_cneter, p)
             
             % initialize p components
@@ -77,7 +77,7 @@ classdef BoxPProjector < handle
             end
         end
         
-        
+        objective = self.computeCost(prox_parm, prox_center, grad, p);
         
         
     end
@@ -88,6 +88,7 @@ classdef BoxPProjector < handle
         % update base for all components
         p =  computeP(self, lambda) % compute the probility corresponding to the chosen lambda value
         lam = computeLambda(self, base, target, num_active_terms)
+        objective = computeCost(self, prox_param, prox_center, grad, p)
         % solves lambda such that sum(p(base, lambda)) == target
         
     end

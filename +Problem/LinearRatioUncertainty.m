@@ -73,29 +73,28 @@ classdef LinearRatioUncertainty < Problem.LinearProblem
             init_p = self.reference_p;
         end
 
-        function next_p = projectP(self, prox_param, prox_center, x, pis)
-            indi_costs = zeros(1, self.k);
-            for ind = 1: self.k
-                cur_pi_projector = self.pi_projectors{ind};
-                grad = self.Tks{ind} * x + self.dks{ind};
-                                cur_cost = (pis{ind})' * grad;
-                indi_costs(ind) = cur_cost;
-            end
-
+        function [next_p, secon_grad, secon_cost] = projectP(self, prox_param, prox_center, indi_costs, pis)
 
             if self.custom_projector
-                next_p = self.fast_PProject(prox_param, prox_center, -indi_costs);
+                [next_p, neg_secon_cost] = self.fast_PProject(prox_param, prox_center, -indi_costs);
             else
-                next_p = self.p_projector.project(prox_param, prox_center, -indi_costs);
+                [next_p, neg_secon_cost] = self.p_projector.project(prox_param, prox_center, -indi_costs);
             end
+            secon_cost = - neg_secon_cost;
+
+            second_stage_grad = zeros(self.n, 1);
+            for ind = 1: self.k
+                second_stage_grad = second_stage_grad + next_p * (self.Tks{ind})' * pis{ind};
+            end
+
         end
 
         
     end
 
     methods(Access = private)
-        function next_p = fast_PProject(self, prox_param, prox_center, grad)
-            next_p = self.box_projector.project(prox_param, prox_center, grad);
+        function [next_p, val] = fast_PProject(self, prox_param, prox_center, grad)
+            [next_p, val]  = self.box_projector.project(prox_param, prox_center, grad);
         end
     end
 end
