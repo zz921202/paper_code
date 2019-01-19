@@ -1,4 +1,4 @@
-classdef BoxPEntropyProjector < Helper.BoxPEntropyProjector.BoxPEntropyProjector
+classdef BoxPEntropyProjector < Helper.BoxPProjector.BoxPProjector
     
     properties
         DELTA = 1e-16;
@@ -11,8 +11,8 @@ classdef BoxPEntropyProjector < Helper.BoxPEntropyProjector.BoxPEntropyProjector
             % update base for all components
             self.prox_param = prox_param;
             for ind = 1: self.k
-                cur_p_component = self.p_components{ind};
-                cur_p_component.base = exp(log(prox_center(ind) + self.DELTA) -1 - 1/prox_parm*(grad(ind)));
+                cur_p_component = self.p_components(ind);
+                cur_p_component.base = exp(log(prox_center(ind) + self.DELTA) -1 - 1/prox_param*(grad(ind)));
             end
         end
 
@@ -20,7 +20,7 @@ classdef BoxPEntropyProjector < Helper.BoxPEntropyProjector.BoxPEntropyProjector
         function p =  computeP(self, lambda) % compute the probility corresponding to the chosen lambda value
             p = zeros(self.k, 1); 
             for ind  = 1: self.k
-                cur_p_component = self.p_components{ind};
+                cur_p_component = self.p_components(ind);
                 cur_p = cur_p_component.base * exp(1/self.prox_param * lambda) - self.DELTA;
                 p(ind) = cur_p_component.getPValue(cur_p);
             end

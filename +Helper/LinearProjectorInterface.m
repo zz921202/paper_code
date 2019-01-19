@@ -29,7 +29,8 @@ classdef LinearProjectorInterface < handle
     methods(Abstract)
         
         [soln, val] = project(self,prox_param, prox_center, grad)
-        str = getDistanceName(self)
+        str =getDistanceName(self)
         % solves min <x, grad>  + U(prox_center, x) * prox_param
+        % % cus_problem = Problem.LinearRatioUncertainty(Helper.PositiveCompleteRandomMatrix(), Helper.PositiveRandomVector(), 'BoxEuclidean');
     end
 end

@@ -12,7 +12,7 @@ classdef BoxPEuclideanProjector < Helper.BoxPProjector.BoxPProjector
             self.prox_param = prox_param;
 %             self.p_components
             for ind = 1: self.k
-                cur_p_component = self.p_components(ind);
+                cur_p_component = self.p_components{ind};
                 cur_p_component.base = prox_center(ind) - 1/prox_param * grad(ind);
             end
         end
@@ -21,8 +21,8 @@ classdef BoxPEuclideanProjector < Helper.BoxPProjector.BoxPProjector
         function p =  computeP(self, lambda) % compute the probility corresponding to the chosen lambda value
             p = zeros(self.k, 1); 
             for ind  = 1: self.k
-                cur_p_component = self.p_components(ind);
-                cur_p = cur_p_component.base + lambda / self.prox_param;
+                cur_p_component = self.p_components{ind};
+                cur_p = base + lambda / self.prox_param;
                 p(ind) = cur_p_component.getPValue(cur_p);
             end
         end
@@ -33,7 +33,7 @@ classdef BoxPEuclideanProjector < Helper.BoxPProjector.BoxPProjector
         end
 
         function objective = computeCost(self, prox_param, prox_center, grad, p)
-            objective = grad' * p + prox_param * 1/2 * norm(p - prox_center)^2;
+            objective = grad' * p + prox_param * 1/2 * norm(p - prox_center);
         end
 
     end

@@ -7,12 +7,14 @@ classdef BoxPProjector < handle
     
     methods
         function setConstraint(self, lower_probs, upper_probs)
-            [~, k] = size(upper_probs);
+            k = length(upper_probs);
             self.k = k;
             self.lower_prob_sum = sum(lower_probs);
             p_components = {};
+            % lower_probs
+            % upper_probs
             for i =1 : k
-                cur_p_component = Helper.BoxPPropector.PComponent();
+                cur_p_component = Helper.BoxPProjector.PComponent();
                 cur_p_component.upper_p = upper_probs(i);
                 cur_p_component.lower_p = lower_probs(i);
                 p_components = [p_components, cur_p_component];
@@ -27,8 +29,8 @@ classdef BoxPProjector < handle
             self.compute_base(prox_param, prox_center, grad);
             upper_lambdas = [];
             lower_lambdas = [];
-            for i = 1:k
-                cur_p_component = self.p_components{i};
+            for i = 1:self.k
+                cur_p_component = self.p_components(i);
                 cur_p_component.upper_lambda = self.computeLambda(cur_p_component.base, cur_p_component.upper_p, 1);
                 cur_p_component.lower_lambda = self.computeLambda(cur_p_component.base, cur_p_component.lower_p, 1);
                 upper_lambdas = [upper_lambdas, cur_p_component.upper_lambda];
@@ -47,11 +49,14 @@ classdef BoxPProjector < handle
             cur_upper_ind = 1;
             % break point search algorithm
             while true
-                cur_lower_p_component = self.p_components{lower_lambda_sort_ind(cur_lower_ind)};
-                cur_upper_p_component = self.p_components{upper_lambda_sort_ind(cur_upper_ind)};
-                if cur_lower_p_component.lower_lambda < cur_upper_p_component.upper_lamda
+                 
+                if cur_lower_ind <= self.k
+                    cur_lower_p_component = self.p_components(lower_lambda_sort_ind(cur_lower_ind));
+                end
+                cur_upper_p_component = self.p_components(upper_lambda_sort_ind(cur_upper_ind));
+                if cur_lower_ind <= self.k && cur_lower_p_component.lower_lambda < cur_upper_p_component.upper_lambda
                     if old_lambda <= cur_lower_p_component.lower_lambda
-                        p = computeP(lambda);
+                        p = self.computeP(old_lambda);
                         break
                     else
                         fixed_value = fixed_value - cur_lower_p_component.lower_p;
@@ -63,21 +68,31 @@ classdef BoxPProjector < handle
                     
                 else
                     if old_lambda <= cur_upper_p_component.upper_lambda
-                        p = computeP(lambda);
+
+                        p = self.computeP(old_lambda);
                         break
                     else
-                        fixed_value = fixed_value + cur_lower_p_component.upper_p;
+                        fixed_value = fixed_value + cur_upper_p_component.upper_p;
                         acc_active_base = acc_active_base - cur_upper_p_component.base;
                         num_active_base = num_active_base - 1;
                         cur_upper_ind  = cur_upper_ind + 1;
                     end
                 end
-                
+                % cur_upper_ind
+                % num_active_base
+                % acc_active_base
+                % cur_lower_ind
                 old_lambda = self.computeLambda(acc_active_base, 1 - fixed_value, num_active_base);
+                % fixed_value
+                % target = 1 - fixed_value
+                % self.computeP(old_lambda)
+
+                
             end
+            objective = self.computeCost(prox_param, prox_center, grad, p);
         end
         
-        objective = self.computeCost(prox_parm, prox_center, grad, p);
+        
         
         
     end

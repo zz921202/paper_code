@@ -10,7 +10,7 @@ classdef EntropyProjector < Helper.LinearProjectorInterface
         k = length(grad);
             cvx_begin quiet
                 variable p(self.n)
-                minimize( grad' * p + ones(1, k) * (kl_div(p, prox_center)) * prox_param)
+                minimize( grad' * p + ones(1, k) * (kl_div(prev_p, p)) * prox_param)
                 subject to 
                     self.model.A * p >= self.model.rhs
             cvx_end

@@ -1,7 +1,8 @@
 classdef LinearProblem < Problem.ProblemDataInterface 
     
     properties
-        data_generator ; 
+        randomMatrixGenerator = [];
+        randomVectorGenerator = [];
         EuclideanProjectorHandle = @Helper.EuclideanProjector;
         x_projector = [];
         pi_projectors = {};
@@ -19,28 +20,32 @@ classdef LinearProblem < Problem.ProblemDataInterface
         % k = 0;
         Mt;
         cp;
-        omega_pi2;
-        omega_x2;
-
         
 
     end
 
     methods 
-        function self = LinearProblem(data_generator)
-            
-            self.data_generator = data_generator;
+        function self = LinearProblem(randomMatrixGenerator, randomVectorGenerator)
+            self.randomMatrixGenerator = randomMatrixGenerator;
+            self.randomVectorGenerator = randomVectorGenerator;
         end
 
-        function [time_elapsed] = generateData(self, k)
+        function [para_str, time_elapsed] = generateData(self, k, m, n)
             
+            param_str = sprintf("%d scenarios with %d rows and %d columns", k, m, n);
+            self.k= k; self.m =m; self.m = n;
+            disp("Generating Example with "+ param_str);
+            [Tks, self.Mt] = self.randomMatrixGenerator.generateTechMatrices(m,n,k);
             
-            self.k= k; 
-            
-            [c, A, b, dks, eks, Wks, Tks, Mt, omega_x2, omega_pi2] = self.data_generator.generateData(k); % k is the number of scenarios
+            Wks = self.randomMatrixGenerator.generateRecourseMatrices(m, n, k);
+            A = self.randomMatrixGenerator.generateAMatrix(m, n);
+            b = self.randomVectorGenerator.generateVector(m);
+            c = self.randomVectorGenerator.generateVector(n);
+            dks = self.randomVectorGenerator.generateVectors(m, k);
+            eks = self.randomVectorGenerator.generateVectors(n, k);
+            self.generatePData(k);
             
             self.Tks=Tks; self.Wks=Wks; self.dks=dks; self.eks=eks; self.A=A; self.b=b; self.c =c; 
-            self.Mt = Mt; self.omega_pi2 = omega_pi2; self.Mt = Mt; self.omega_x2 = omega_x2;
             % generate projector for each individual scenario
             pi_projectors = {};
             for scen_ind = 1 :k 
@@ -52,12 +57,12 @@ classdef LinearProblem < Problem.ProblemDataInterface
             self.x_projector = self.EuclideanProjectorHandle();
             self.x_projector.setConstraint(A, b);
 
-            self.generatePData( k);
+            
 
             myTimer = Helper.Timer();
             myTimer.start();
             self.opt_val = self.getReferenceObjective();
-            myTimer.pause();
+            myTimer.pasue();
             time_elapsed = myTimer.getTime();
             disp(sprintf('Optimal Objective is %s computed in %s sceonds', num2str(self.opt_val), num2str(time_elapsed)));            
         end
@@ -129,23 +134,14 @@ classdef LinearProblem < Problem.ProblemDataInterface
             gap = objective_val - self.opt_val;
         end
 
-
+        function Mt = getMt(self)
+            self.Mt;
+        end
 
         function [A, b] = getXConstraint(self)
             A = self.x_projector.model.A;
             b = self.x_projector.model.b;
         end
-
-        function [omega_x2, omega_p2, omega_pi2, cp, Mt] = getParamsEstimate(self)
-            omega_x2 = self.omega_x2;
-            omega_p2 = self.omega_p2;
-            omega_pi2 = self.omega_pi2;
-            cp = self.getCp();
-            omega_p2 = self.getConservativeBregDist();
-        end
-    end
-
-    methods(Access= protected)
 
         function cp = getCp(self)
             if self.p_projector.getDistanceName() == 'Entropy'
@@ -157,6 +153,15 @@ classdef LinearProblem < Problem.ProblemDataInterface
             end
         end
 
+        function dist_est = getConservativePiBregDist(self)
+            ext_vecs = {};
+            for ind = 1: self.k
+                cur_ek = self.eks{ind};
+                cur_ext_vec = cur_ek(1: self.m) - cur_ek(self.m + 1: 2 * self.m);
+                ext_vecs = [ext_vecs, cur_ext_vec];
+            end
+            dist_est = Helper.computeMaxL2norm2(ext_vecs);
+        end
 
 
 
@@ -169,10 +174,9 @@ classdef LinearProblem < Problem.ProblemDataInterface
                 error('Unknown p_projector, please compute cp beforehand');
             end
         end
+
+
     end
-
-
-    
     methods(Abstract)
         % handles projection
         

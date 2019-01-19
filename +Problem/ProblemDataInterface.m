@@ -1,8 +1,8 @@
-classdef ProblemDataInterface 
+classdef ProblemDataInterface < handle
     properties
-        RefObjective;
-        m = 0;
-        n = 0;
+        opt_val;
+        % m = 0;
+        % n = 0;
         k = 0;
         c = [];
     end
@@ -26,7 +26,8 @@ classdef ProblemDataInterface
         [indi_costs, pis] = solveForPis(self, x)
 
         %%initialization 
-        [para_str, time] = generateData(self, k, m, n)
+
+        
         %  optimal soln will be computed, prefereably extensive LP solver as a baseline comparison by calling getReferenceObjective
         %  will print "generating data", "computing optimal Soln" and "time taken to solve the problem"
 
@@ -36,10 +37,11 @@ classdef ProblemDataInterface
         [A, b] = getXConstraint(self)
 
         %TODO 
-        cp = getCP(self) % get it from p projector
-        getConservativePBregDist(self)
-        dist_est = getConservativePiBregDist(self)
-        mt = getMt(self)
+        [para_str, time] = generateData(self, k)
+        [omega_x2, omega_p2, omega_pi2, cp, Mt] = getParamsEstimate(self)
+        % p_dist_est = getConservativePBregDist(self)
+        % dist_est = getConservativePiBregDist(self)
+        % mt = getMt(self)
         % getPRatio(self)
 
     end
