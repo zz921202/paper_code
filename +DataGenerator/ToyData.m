@@ -1,14 +1,16 @@
-classdef SimpleCompleteRecourseRandomData < DataGenerator.DataGeneratorInterface
+classdef ToyData < DataGenerator.DataGeneratorInterface
 properties
-    m;
-    n;
-    X_BOX = 100;
+    m1 = 1;
+    n1 = 2;
+    m2 = 1;
+    m2 = 2;
+    X_BOX = 10;
     UPPERBOUND = 20;
     LOWERBOUND = 1;
 end
 
 methods
-    function self = SimpleCompleteRecourseRandomData(m,n)
+    function self = ToyData()
         self.m = m;
         self.n = n;
         if n < 2 * m
@@ -19,14 +21,17 @@ methods
     function  [c, A, b, dks, eks, Wks, Tks, Mt, omega_x2, omega_pi2] = generateData(self,k) % k is the number of scenarios
         param_str = sprintf("%d scenarios with %d rows and %d columns", k, self.m, self.n);
         disp("Generating Example with "+ param_str);
-        c = self.genVector(self.n, self.LOWERBOUND, self.UPPERBOUND);
-        b = self.genVector(self.m, self.LOWERBOUND, self.UPPERBOUND);
+        c = zeros(1,1)
+        A = [1]
+        b = [1]
+
+        % b = self.genVector(self.n, self.LOWERBOUND, self.UPPERBOUND);
         omega_x2 = self.n * self.X_BOX;
         A = self.generateAMatrix( self.m, self.n);
         eks = self.genVectors(self.n, k, self.LOWERBOUND, self.UPPERBOUND);
         dks = self.genVectors(self.m, k, self.LOWERBOUND, self.UPPERBOUND);
-        [Tks, Mt] = self.generateTechMatrices( self.m, self.n, k);
-        Wks = self.generateRecourseMatrices(self.m, self.n, k);
+        [Tks, Mt] = self.generateTechMatrices( self.m2, self.n2, k);
+        Wks = self.generateRecourseMatrices(self.m2, self.n2, k);
 
         ext_vecs = {};
         for ind = 1: k

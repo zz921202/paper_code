@@ -4,7 +4,7 @@ classdef TerminatorInterface < handle
     end
 
     methods
-        function setFOAlgorithm(self, fo_algortihm) 
+        function setFOAlgorithm(self, fo_algorithm) 
             self.fo_algorithm = fo_algorithm;
         end
     end

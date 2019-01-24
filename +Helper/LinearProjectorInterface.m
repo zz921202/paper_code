@@ -9,6 +9,10 @@ classdef LinearProjectorInterface < handle
     methods
         % solves min <grad, x>
         function [val, soln] = solve(self, grad)
+            % grad = grad
+%             A = full(self.model.A);
+%             % size(A)
+%             rhs = self.model.rhs;
             self.model.obj = grad;
             params.outputflag = 0;
             result = gurobi(self.model, params);
@@ -18,6 +22,8 @@ classdef LinearProjectorInterface < handle
 
         function setConstraint(self, A, b)
             % Ax >= b
+            [~, n] = size(A);
+            self.model.lb = -inf(n,1);
             [self.m, self.n] = size(A);
             self.model.A = sparse(A);
             self.model.rhs = b;

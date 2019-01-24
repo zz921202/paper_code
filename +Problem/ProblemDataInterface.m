@@ -5,6 +5,11 @@ classdef ProblemDataInterface < handle
         % n = 0;
         k = 0;
         c = [];
+        m1 = 0;
+        n1 = 0;
+        m2 = 0;
+        n2 = 0;
+        ref_x;
     end
 
     methods(Abstract)

@@ -33,9 +33,9 @@ classdef LinearRatioUncertainty < Problem.LinearProblem
 
         function generatePData(self, k)
             self.reference_p = ones(k, 1) ./ k;%TODO
-            rand_vec = rand(k, 1) * 10 + 1;
+            % rand_vec = rand(k, 1) * 10 + 1;
             % rand_vec = [1;4];
-            self.reference_p = rand_vec / sum(rand_vec);
+            % self.reference_p = rand_vec / sum(rand_vec);
             A = [-ones(1, k); ones(1, k); -eye(k); eye(k); eye(k)];
             b = [-1 ; 1; -self.beta * self.reference_p; self.alpha * self.reference_p; zeros(k, 1)];
             self.p_projector.setConstraint(A, b);
@@ -47,12 +47,18 @@ classdef LinearRatioUncertainty < Problem.LinearProblem
         end
 
         function [total_cost, p] = solveForP(self, individual_costs)
-            [total_cost, p] = self.p_projector.solve(-individual_costs);
+            [total_cost, p] = self.p_projector.solve(-individual_costs);%%%%%%%%%%%%%%%%%%%%
             total_cost = - total_cost;
         end
 
         function optimal_val = getReferenceObjective(self)
             [n1, m1, n2, m2] = self.data_generator.getProblemDimension();
+
+            if self.alpha == 1
+                beta_hat = self.beta;
+            else
+                beta_hat = (self.beta - self.alpha) / (1 - self.alpha);
+            end
 
             cvx_begin quiet
                 variable  y(n2, self.k)
@@ -61,9 +67,9 @@ classdef LinearRatioUncertainty < Problem.LinearProblem
                 variable f(self.k,1)
                 variable fplus(self.k, 1)
                 % minimize( self.c' * x)
-                minimize( (1 - self.alpha)*( t + self.beta * self.reference_p' * fplus) + self.alpha * self.reference_p' * f + self.c'  * x)
+                minimize( (1 - self.alpha)*( t + beta_hat * self.reference_p' * fplus) + self.alpha * self.reference_p' * f + self.c'  * x)
                 subject to
-                
+                    self.A * x >= self.b;
                 for i =1 :self.k
                     f(i) >= (self.eks{i})' * y(:, i)
                     fplus(i) >= f(i) - t
@@ -73,7 +79,10 @@ classdef LinearRatioUncertainty < Problem.LinearProblem
                 x >= 0
                 y >= 0
             cvx_end                                       
+            x
             optimal_val  = cvx_optval;
+
+            self.ref_x = x;
         end
         
 
