@@ -3,6 +3,7 @@ classdef BoxPEntropyProjector < Helper.BoxPProjector.BoxPProjector
     properties
         DELTA = 1e-16;
         prox_param;
+        base_lambda;
     end
     methods
 
@@ -10,9 +11,10 @@ classdef BoxPEntropyProjector < Helper.BoxPProjector.BoxPProjector
         function compute_base(self, prox_param, prox_center, grad)
             % update base for all components
             self.prox_param = prox_param;
+            self.base_lambda = min(1/prox_param .* grad);
             for ind = 1: self.k
                 cur_p_component = self.p_components(ind);
-                cur_p_component.base = exp(log(prox_center(ind) + self.DELTA) -1 - 1/prox_param*(grad(ind)));
+                cur_p_component.base = exp(log(prox_center(ind) + self.DELTA) -1 - 1/prox_param*(grad(ind)) + self.base_lambda);
             end
         end
 
@@ -21,14 +23,14 @@ classdef BoxPEntropyProjector < Helper.BoxPProjector.BoxPProjector
             p = zeros(self.k, 1); 
             for ind  = 1: self.k
                 cur_p_component = self.p_components(ind);
-                cur_p = cur_p_component.base * exp(1/self.prox_param * lambda) - self.DELTA;
+                cur_p = cur_p_component.base * exp(1/self.prox_param * lambda - self.base_lambda) - self.DELTA;
                 p(ind) = cur_p_component.getPValue(cur_p);
             end
         end
         function lam = computeLambda(self, base, target, num_active_terms)
         % solves lambda such that sum(p(base, lambda)) == target
             real_target = target + self.DELTA * num_active_terms;
-            lam = log(real_target / base) * self.prox_param;
+            lam = (log(real_target / base) + self.base_lambda)* self.prox_param;
         end
 
         function objective = computeCost(self, prox_param, prox_center, grad, p)

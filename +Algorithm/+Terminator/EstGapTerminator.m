@@ -1,6 +1,6 @@
 classdef EstGapTerminator < Algorithm.Terminator.TerminatorInterface
     properties
-        GAP = 1e-1;
+        GAP = 1e-2;
     end
 
     methods

@@ -1,8 +1,8 @@
 classdef PDDAlgorithm < Algorithm.FOAlgorithm
     properties
-        omega_pi_ratios = [1, 1e1, 1e-1 ];
-        omega_p_ratios = [1, 1e1,  1e-1];
-        omega_x_ratios = [1,  1e-1, 1e-2];
+        omega_pi_ratios = [1,  0.5, 1e-1, 1e-2];
+        omega_p_ratios = [1,  0.5, 1e-1, 1e-2];
+        omega_x_ratios = [1,  0.5, 1e-1];
         cur_omega_p;
         cur_omega_pi;
         cur_M_pi;
@@ -51,8 +51,8 @@ classdef PDDAlgorithm < Algorithm.FOAlgorithm
             ppi_index = index - num_ppi * (x_choice-1);
             p_choice = floor((ppi_index-0.1) / num_pi_choices) + 1;
             pi_choice = ppi_index - (p_choice-1) * (num_pi_choices);
-            str = sprintf('param choice x %s, p_ratio: %s, pi_ratio %s', num2str(self.omega_x_ratios(x_choice)),num2str(self.omega_p_ratios(p_choice)), num2str(self.omega_pi_ratios(pi_choice)));
-            disp(str)
+            % fprintf('param choice x %s, p_ratio: %s, pi_ratio %s\n', num2str(self.omega_x_ratios(x_choice)),num2str(self.omega_p_ratios(p_choice)), num2str(self.omega_pi_ratios(pi_choice)));
+            str = sprintf( '%s %s %s', num2str(self.omega_x_ratios(x_choice)),num2str(self.omega_p_ratios(p_choice)), num2str(self.omega_pi_ratios(pi_choice)));
         end
 
         function self = PDDAlgorithm(problem_data, terminator)
@@ -83,7 +83,7 @@ classdef PDDAlgorithm < Algorithm.FOAlgorithm
             cur_p = self.cur_p;
             cur_pis = self.cur_pis;
             [lambda, sigma, eta, tau] = self.getProxParams();
-            fprintf('param choices are pi: %s, x: %s\n', num2str(sigma), num2str(eta));
+            % fprintf('param choices are pi: %s, x: %s\n', num2str(sigma), num2str(eta));
             momentum = cur_x - pre_x;
             while ~self.terminator.terminate()
                 
@@ -103,9 +103,13 @@ classdef PDDAlgorithm < Algorithm.FOAlgorithm
             end
             x = self.cur_x; obj_val = self.cur_obj; est_gap = self.cur_est_gap;  true_gap=self.cur_true_gap; time_elapsed=self.time_elapsed; num_iters=self.num_iters;
         end
+
+        function str = getName(self)
+            str = 'pdd';
+        end
     end
 
-    methods(Access = public)%
+    methods(Access = private)%
         function  [lambda, sigma, eta, tau] = getProxParams(self)
             lambda = 1;
             prob = self.problem_data; %TODO
@@ -155,6 +159,8 @@ classdef PDDAlgorithm < Algorithm.FOAlgorithm
             self.cur_est_gap = self.cur_upper - self.cur_lower;
             
         end
+
+
     end
 
 

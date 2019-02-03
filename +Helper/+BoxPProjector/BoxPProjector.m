@@ -53,6 +53,7 @@ classdef BoxPProjector < handle
                 if cur_lower_ind <= self.k
                     cur_lower_p_component = self.p_components(lower_lambda_sort_ind(cur_lower_ind));
                 end
+%                 cur_upper_ind
                 cur_upper_p_component = self.p_components(upper_lambda_sort_ind(cur_upper_ind));
                 if cur_lower_ind <= self.k && cur_lower_p_component.lower_lambda < cur_upper_p_component.upper_lambda
                     if old_lambda <= cur_lower_p_component.lower_lambda
@@ -82,6 +83,7 @@ classdef BoxPProjector < handle
                 % num_active_base
                 % acc_active_base
                 % cur_lower_ind
+%                 acc_active_basex
                 old_lambda = self.computeLambda(acc_active_base, 1 - fixed_value, num_active_base);
                 % fixed_value
                 % target = 1 - fixed_value

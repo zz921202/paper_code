@@ -1,8 +1,8 @@
 classdef FixedNestrov < Algorithm.NestrovTypeAlgorithm 
     properties
-        omega_p_ratios = [ 1e-2, 1e-3, 1e-4];
-        omega_pi_ratios = [ 1e-2, 1e-3, 1e-4];
-        omega_x_ratios = [ 1, 1e-1, 1e-2]
+        omega_p_ratios = [1e-1, 1e-2, 1e-3, 1e-4];
+        omega_pi_ratios = [ 1e-1, 1e-2, 1e-3, 1e-4];
+        omega_x_ratios = [ 1e-1, 1e-2, 1e-3, 1e-4]
         MAXITER;
     end
     methods
@@ -28,6 +28,10 @@ classdef FixedNestrov < Algorithm.NestrovTypeAlgorithm
             mu_p_t = mu1 * self.cp * self.cur_M_pi * self.Mt^2 * CONSTANT / self.cur_omega_p * self.omega_p_ratios(self.p_choice);
 %             mu_p_t = 0;%TODO
             mu_pi_t = mu1 * self.Mt^2 * CONSTANT / self.cur_omega_pi * self.omega_pi_ratios(self.pi_choice);
+        end
+
+        function str = getName(self)
+            str = 'fixNes';
         end
     end
 end

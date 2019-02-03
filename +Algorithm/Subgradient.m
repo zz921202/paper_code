@@ -19,7 +19,7 @@ classdef Subgradient < Algorithm.FixedNestrov
             smooth_pis = self.smooth_pis;
             [gamma_t_inv, mu_pi_t, mu_p_t, alpha_t] = self.getProxParams();
             mu_pi_t = 0;
-            mu_p_t = 0;
+            mu_p_t = 1e-16;
             fake_cost = self.problem_data.evalFakeCost(self.problem_data.ref_x, mu_p_t, smooth_p, mu_pi_t, smooth_pis);
             temp_cost = self.problem_data.evalFakeCost(cur_x_temp, mu_p_t, smooth_p, mu_pi_t, smooth_pis);
             while ~self.terminator.terminate()
@@ -53,6 +53,9 @@ classdef Subgradient < Algorithm.FixedNestrov
 
         function self = Subgradient(problem_data, terminator)
             self@Algorithm.FixedNestrov(problem_data, terminator);
+            self.omega_x_ratios = [1];
+            self.omega_p_ratios =[1];
+            self.omega_pi_ratios = [1];
             self.num_param_choices = length(self.omega_x_ratios) * length(self.omega_p_ratios) * length(self.omega_pi_ratios);
         end
 
@@ -66,6 +69,10 @@ classdef Subgradient < Algorithm.FixedNestrov
             [cur_p, secon_grad, secon_cost] = self.problem_data.projectP(mu_p_t, smooth_p, indi_costs, cur_pis)
 
             x_grad = secon_grad + self.problem_data.c
+        end
+
+        function str = getName(self)
+            str = 'subGrd';
         end
 
     end

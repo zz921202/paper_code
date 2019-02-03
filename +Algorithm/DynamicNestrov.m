@@ -1,8 +1,8 @@
 classdef DynamicNestrov < Algorithm.NestrovTypeAlgorithm 
     properties
-        omega_p_ratios = [ 1e-2, 1e-3, 1e-4];
-        omega_pi_ratios = [ 1e-2, 1e-3, 1e-4];
-        omega_x_ratios = [1e1, 1, 1e-1];
+        omega_p_ratios = [ 1e-2, 1e-3, 1e-1];
+        omega_pi_ratios = [ 1e-2, 1e-3, 1e-1];
+        omega_x_ratios = [1e-1, 1e-2, 1e-3];
         MAXITER;
     end
     methods
@@ -22,6 +22,10 @@ classdef DynamicNestrov < Algorithm.NestrovTypeAlgorithm
             gamma_t_inv = 1 / c * self.omega_x_ratios(self.x_choice) ;
             mu_p_t = mu_t * self.cp * self.cur_M_pi * self.Mt^2 * CONSTANT / self.cur_omega_p * self.omega_p_ratios(self.p_choice);;
             mu_pi_t = mu_t * self.Mt^2 * CONSTANT / self.cur_omega_pi * self.omega_pi_ratios(self.pi_choice);
+        end
+
+        function str = getName(self)
+            str = 'dynNes';
         end
     end
 end

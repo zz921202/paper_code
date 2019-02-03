@@ -91,7 +91,9 @@ classdef LinearRatioUncertainty < Problem.LinearProblem
         end
 
         function [next_p, secon_grad, secon_cost] = projectP(self, prox_param, prox_center, indi_costs, pis)
-
+            % prox_param = prox_param
+            % prox_center = prox_center
+            % indi_costs = indi_costs
             if self.box_projector_flag
                 [next_p, neg_secon_cost] = self.fast_PProject(prox_param, prox_center, -indi_costs);
             else
@@ -112,8 +114,18 @@ classdef LinearRatioUncertainty < Problem.LinearProblem
 
     methods(Access = private)
         function [next_p, val] = fast_PProject(self, prox_param, prox_center, grad)
-            
-            [next_p, val]  = self.box_projector.project(prox_param, prox_center, grad);
+            try
+                
+                [next_p, val]  = self.box_projector.project(prox_param, prox_center, grad);
+                if any(isnan(next_p))
+                     % fprintf('hello\n')
+                    [next_p, val] = self.p_projector.project(prox_param, prox_center, grad);
+
+                end
+            catch
+                % fprintf('hello    000\n')
+                [next_p, val] = self.p_projector.project(prox_param, prox_center, grad);
+            end
         end
     end
 end

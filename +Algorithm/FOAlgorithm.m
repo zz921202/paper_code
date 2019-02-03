@@ -101,6 +101,7 @@ classdef FOAlgorithm < handle
     end
 
     methods(Abstract)
+        str = getName(self);
         [x, obj_val, est_gap, true_gap, time_elapsed, num_iters] = run(self)
         setGridParam(self, index)
         % disp parameter choice in words

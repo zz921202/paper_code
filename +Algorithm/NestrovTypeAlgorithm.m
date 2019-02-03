@@ -42,8 +42,9 @@ classdef NestrovTypeAlgorithm < Algorithm.FOAlgorithm
             ppi_index = index - num_ppi * (x_choice-1);
             p_choice = floor((ppi_index-0.1) / num_p_choices) + 1;
             pi_choice = ppi_index - (p_choice-1) * (num_p_choices);
-            str = sprintf('param choice x %s, p_ratio: %s, pi_ratio %s', num2str(self.omega_x_ratios(x_choice)),num2str(self.omega_p_ratios(p_choice)), num2str(self.omega_pi_ratios(pi_choice)));
-            disp(str)
+            % fprintf('param choice x %s, p_ratio: %s, pi_ratio %s\n', num2str(self.omega_x_ratios(x_choice)),num2str(self.omega_p_ratios(p_choice)), num2str(self.omega_pi_ratios(pi_choice)));
+            
+            str = sprintf( '%s %s %s', num2str(self.omega_x_ratios(x_choice)),num2str(self.omega_p_ratios(p_choice)), num2str(self.omega_pi_ratios(pi_choice)));
         end
 
         function [x, obj_val, est_gap, true_gap, time_elapsed, num_iters] = run(self)
