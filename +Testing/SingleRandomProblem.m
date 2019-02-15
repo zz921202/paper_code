@@ -6,16 +6,20 @@ classdef SingleRandomProblem < Testing.SingleProblemInterface
         % assume numCols  =  2* numRows
         num_scenarios ;
         breg_dist;
+        alpha = 0.9;
+        beta = 1.1;
 
     end
 
     methods
         function ref_problem = generateData(self) % generate a Problem Data to put inside 
-            mat_gen = DataGenerator.SimpleCompleteRecourseRandomData(self.num_rows, self.num_rows * 2); 
-            ref_problem = Problem.LinearRatioUncertainty(mat_gen,  self.breg_dist);
+            % mat_gen = DataGenerator.SimpleCompleteRecourseRandomData(self.num_rows, self.num_rows * 2); 
+            mat_gen = DataGenerator.ToyRecourseRandomDataGenerator(self.num_rows, self.num_rows * 2); 
+
+            ref_problem = Problem.ToyLinearProblem(mat_gen,  self.breg_dist);
             rng(self.rng_seed);
-            ref_problem.alpha =.99;
-            ref_problem.beta = 1.02;
+            ref_problem.alpha = self.alpha;
+            ref_problem.beta = self.beta;
             rng(self.rng_seed)
             ref_problem.generateData(self.num_scenarios);
 
@@ -31,7 +35,7 @@ classdef SingleRandomProblem < Testing.SingleProblemInterface
         end
 
         function problem_str = getProblemStr(self)
-            problem_str = sprintf('rng %d, rows %d, scenarios %d, %s, %d',self.rng_seed, self.num_rows, self.num_scenarios, self.breg_dist, self.max_iter);
+            problem_str = sprintf('rng %d, rows %d, scenarios %d, %s, %d, alpha %s, beta %s',self.rng_seed, self.num_rows, self.num_scenarios, self.breg_dist, self.max_iter, num2str(self.alpha), num2str(self.beta));
         end
 
     end

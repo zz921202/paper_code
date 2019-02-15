@@ -28,12 +28,13 @@ classdef FOAlgorithm < handle
 
         Mt;
         cp;
-        conservative_p_breg_dist; 
-        conservative_pi_breg_dist;
+        est_p_breg_dist; 
+        est_pi_breg_dist;
         x_radius2_est;
         smooth_pis;
         smooth_p;
-
+        A;
+        prob_ratio;
         dist_to_x_history = [];
     end
 
@@ -65,7 +66,7 @@ classdef FOAlgorithm < handle
             self.time_history = [self.time_history; self.time_elapsed];
             [self.cur_obj, self.cur_true_gap] = self.problem_data.evalX(self.cur_x);
             self.obj_history = [self.obj_history; self.cur_obj];
-            self.dist_to_x_history = [self.dist_to_x_history, norm(self.cur_x - self.problem_data.ref_x)];
+%             self.dist_to_x_history = [self.dist_to_x_history, norm(self.cur_x - self.problem_data.ref_x)];
             self.gap_history = [self.gap_history, self.cur_est_gap];
             self.num_iters = self.num_iters + 1;
         end
@@ -74,12 +75,15 @@ classdef FOAlgorithm < handle
             terminator.setFOAlgorithm(self);
             self.terminator = terminator;
             self.problem_data = problem_data; % problem 
-            [omega_x2, omega_p2, omega_pi2, cp, Mt] = problem_data.getParamsEstimate();
+            [omega_x2, ~, omega_pi2, cp, Mt] = problem_data.getParamsEstimate();
+            [omega_p2, ratio, A] = problem_data.getProbParamEstimate();
             self.cp = cp;
             self.Mt = Mt;
+            self.prob_ratio = ratio;
+            self.A = A;
             self.x_radius2_est = omega_x2;
-            self.conservative_p_breg_dist = omega_p2;
-            self.conservative_pi_breg_dist = omega_pi2;
+            self.est_p_breg_dist = omega_p2;
+            self.est_pi_breg_dist = omega_pi2;
             % counting param choices will be initialized in the subclass
             self.smooth_pis = problem_data.getInitialPis();
             k = self.problem_data.k;
@@ -96,6 +100,15 @@ classdef FOAlgorithm < handle
             end
             self.setGridParam(self.param_counter);
             self.showGridParam(self.param_counter);
+        end
+
+        function p_to_pi_ratio = getOptimalSmoothingRatio(self)
+            % be careful about the case when alpha = 0 and ratio = inf
+            if self.est_p_breg_dist < 1e-14
+                p_to_pi_ratio = 0;
+            else
+                p_to_pi_ratio = self.cp * sqrt(2) * self.est_pi_breg_dist / sqrt(self.est_p_breg_dist);
+            end
         end
 
     end

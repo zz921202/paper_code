@@ -1,25 +1,27 @@
-k = 20;
-n = 40;
+k = 200;
+n = 200;
 m = n/2;
 
 pis = {};
-% for i = 1: k
-%     pis = [pis, ones(m,1)];
-% end
+for i = 1: k
+    pis = [pis, ones(m,1)];
+end
 
 indi_costs = zeros(k, 1);
 indi_costs(1) = 1;
 mat_gen = DataGenerator.ToyRecourseRandomDataGenerator(m,n);
 
 ref_problem = Problem.ToyLinearProblem(mat_gen,  'Euclidean');
-ref_problem.alpha = .5;%x
-ref_problem.beta = 20;
-% rng(10)
+% ref_problem1 = Problem.LinearRatioUncertainty(mat_gen,  'Euclidean');
+ref_problem.alpha = 1;
+rng(10)
 ref_problem.generateData(k);
+
+% rng(10)
+% ref_problem1.generateData(k);
 % tic
 % [ref_p, ref_grad, ref_cost] = ref_problem.projectP(1, ones(k,1)/ k, indi_costs, pis)
 % toc
-
 
 % cus_problem = Problem.LinearRatioUncertainty(mat_gen, 'BoxEntropy');
 % % cus_problem.alpha = 0;
@@ -34,8 +36,10 @@ ref_problem.generateData(k);
 %          0];
 
 terminator = Algorithm.Terminator.MaxIterTerminator();
-terminator.MAXITERATION = 20;
+terminator.MAXITERATION = 100;
+% alg = Algorithm.ExperimentDSLAlgorithm(ref_problem, terminator);
 alg = Algorithm.DynamicNestrov(ref_problem, terminator);
+
 % alg.setGridParam(1);
 best_val = Inf;
 best_gap = Inf;
@@ -47,25 +51,25 @@ best_ind  = 0;
 while alg.nextGridParam()
     ind  = ind + 1;
     [cur_x, cur_obj_val, est_gap, true_gap, time_elapsed, num_iters] = alg.run();
-    fprintf('%s th parameter choice with obj_val%s and gap %s\n', num2str(ind), num2str(cur_obj_val), num2str(true_gap));
+
+    fprintf('%s th parameter choice: %s with obj_val%s and gap %s,   %s sec\n', num2str(ind), alg.showGridParam(ind), num2str(cur_obj_val), num2str(true_gap), num2str(time_elapsed));
     if cur_obj_val < best_val
         best_val = cur_obj_val;
         best_gap = true_gap;
         best_ind = ind
     end
 end
-terminator.MAXITERATION = 200;
-
+terminator.MAXITERATION = 2000;
+alg.showGridParam(best_ind);
 alg.setGridParam(best_ind);
 [cur_x, cur_obj_val, est_gap, true_gap, time_elapsed, num_iters] = alg.run()
 figure
-
+% plot(alg.obj_history)
 semilogy(alg.obj_history-ref_problem.opt_val);
 hold on
 
 % plot([0, length(alg.obj_history)], [ref_problem.opt_val, ref_problem.opt_val], 'r')
 title('obj history: dynamic Nestrov')
-alg.showGridParam(best_ind)
 % title('obj history')
 % % figure;
 % % hold on

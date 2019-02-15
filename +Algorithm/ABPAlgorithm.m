@@ -11,12 +11,19 @@ classdef ABPAlgorithm < Algorithm.DSLAlgorithm
             cur_lower = self.phase_lower;
             [cur_upper, ~] = self.problem_data.evalX(self.phase_x0);
             self.bundle = Algorithm.Bundle(self.problem_data);
+            self.bundle.LIMIT = 100;
             while ~self.terminator.terminate()
                 self.mytimer.start()
                 alpha_t = 2 / (t+1);
                 x_tl = (1 - alpha_t) * self.cur_x + alpha_t * x_t;
+                % smooth_pis = self.smooth_pis
+                % phase_mu_pi = self.phase_mu_pi
 %                 self.phase_mu_pi
                 [cur_pis, indi_costs] = self.problem_data.projectPis(self.phase_mu_pi, self.smooth_pis, x_tl);
+                % phase_mu_p = self.phase_mu_p
+                % smooth_p = self.smooth_p
+                % cur_pis = cur_pis
+                % indi_costs = indi_costs
                 [~, secon_grad, secon_costs] = self.problem_data.projectP(self.phase_mu_p, self.smooth_p, indi_costs, cur_pis);
                 % [cur_x_temp, total_cost] = self.problem_data.projectX(gamma_t_inv, cur_x_temp, secon_grad);
                 obj_vec = self.problem_data.c + secon_grad;%TODO change for more general f composition

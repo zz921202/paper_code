@@ -1,27 +1,10 @@
-prox_param = 4.7451
+% mat_gen = DataGenerator.SimpleCompleteRecourseRandomData(1, 2); 
+% ref_problem = Problem.LinearRatioUncertainty(mat_gen,  'Euclidean');
 
+% ref_problem.alpha =.99;
+% ref_problem.beta = 1.02;
 
-prox_center =...
-    [0.1000
-    0.1000
-    0.1000
-    0.1000
-    0.1000
-    0.1000
-    0.1000
-    0.1000
-    0.1000
-    0.1000]
+% ref_problem.generateData(10);
+% [omega_p2, ratio, A] = ref_problem.getProbParamEstimate()
 
-
-indi_costs = ...  
-[1.0565
-    0.1440
-    0.9865
-    0.2247
-    0.0583
-    0.8885
-    0.3803
-    0.6959
-    0.8525
-    0.1764] * 1e4
+disp('hello world')

@@ -29,7 +29,7 @@ classdef DSLAlgorithm < Algorithm.FOAlgorithm
     methods
         
         function setGridParam(self, index)
-            self.cur_p_estimate = sqrt(self.conservative_p_breg_dist) * self.omega_p_ratios(index);
+            self.cur_p_estimate = sqrt(self.est_p_breg_dist) * self.omega_p_ratios(index);
         end
         % disp parameter choice in words
         % just call showGridParam 
@@ -153,8 +153,15 @@ classdef DSLAlgorithm < Algorithm.FOAlgorithm
 %             phase_l = self.BETA * v_lower + (1 - self.BETA) * v_upper
             self.phase_l = self.BETA * self.phase_lower + (1 - self.BETA) * v_upper;
             
-            mu = (self.THETA * (v_upper - self.phase_l)) / (2 * self.cur_omega_pi2_estimate *(1 + sqrt(2)) * self.cur_p_estimate * self.cp);
+            mu = (self.THETA * (v_upper - self.phase_l)) / (2 * self.cur_omega_pi2_estimate *(1 + sqrt(2) * self.cur_p_estimate * self.cp));
             self.phase_mu_p = mu * self.cur_omega_pi2_estimate * self.cp * sqrt(2) / self.cur_p_estimate;
+            if self.cur_p_estimate < 1e-14
+                optimal_ratio = 0;
+            else
+                optimal_ratio = self.cur_omega_pi2_estimate * self.cp * sqrt(2) / self.cur_p_estimate
+            end
+
+            self.phase_mu_p = mu * optimal_ratio;
             self.phase_mu_pi = mu;
             % self.phase_mu_p = 0;
             % self.phase_mu_pi = 0;

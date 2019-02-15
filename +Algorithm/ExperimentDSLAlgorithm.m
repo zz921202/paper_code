@@ -35,7 +35,7 @@ classdef ExperimentDSLAlgorithm < Algorithm.FOAlgorithm
             pi_index = floor((index-0.1)/num_p) + 1;
             self.OMEGAPI = self.OMEGAPIS(pi_index);
             p_index = index - (pi_index -1) * num_p;
-            self.cur_p_estimate = sqrt(self.conservative_p_breg_dist) * self.omega_p_ratios(p_index);
+            self.cur_p_estimate = sqrt(self.est_p_breg_dist) * self.omega_p_ratios(p_index);
         end
         % disp parameter choice in words
         % just call showGridParam 
@@ -146,6 +146,7 @@ classdef ExperimentDSLAlgorithm < Algorithm.FOAlgorithm
                 end
 
                 if self.updateRadiusEstimate(pl, pisl) || self.updateRadiusEstimate(p_tmd, tmd_pis)
+                    self.terminate_phase(cur_lower, self.cur_omega_pi2_estimate);
                     break
                 end
                 % Q = max(Helper.computeMaxL2norm2(tmd_pis), Helper.computeMaxL2norm2(cur_pis));
@@ -211,7 +212,13 @@ classdef ExperimentDSLAlgorithm < Algorithm.FOAlgorithm
             self.phase_l = self.BETA * self.phase_lower + (1 - self.BETA) * v_upper;
             
             mu = (self.THETA * (v_upper - self.phase_l)) / (self.cst_ratio * 2 * self.cur_omega_pi2_estimate *(1 + sqrt(2) * self.cur_p_estimate * self.cp));
-            self.phase_mu_p = mu * self.cur_omega_pi2_estimate * self.cp * sqrt(2) / self.cur_p_estimate;
+            if self.cur_p_estimate < 1e-14
+                optimal_ratio = 0;
+            else
+                optimal_ratio = self.cur_omega_pi2_estimate * self.cp * sqrt(2) / self.cur_p_estimate;
+            end
+
+            self.phase_mu_p = mu * optimal_ratio;
             self.phase_mu_pi = mu;
             % self.phase_mu_p = 0;
             % self.phase_mu_pi = 0;

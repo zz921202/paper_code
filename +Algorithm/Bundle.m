@@ -1,7 +1,7 @@
 classdef Bundle < handle 
 
     properties
-        LIMIT = 20;
+        LIMIT = 40;
         projector = Helper.EuclideanProjector();
         A;
         b;

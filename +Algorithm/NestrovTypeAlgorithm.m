@@ -25,11 +25,11 @@ classdef NestrovTypeAlgorithm < Algorithm.FOAlgorithm
             num_ppi = num_p_choices * num_pi_choices;
             self.x_choice = floor((index-0.1) / (num_ppi)) + 1;
             ppi_index = index - num_ppi * (self.x_choice-1);
-            self.p_choice = floor((ppi_index-0.1) / num_p_choices) + 1;
-            self.pi_choice = ppi_index - (self.p_choice-1) * (num_p_choices);
+            self.p_choice = floor((ppi_index-0.1) / num_pi_choices) + 1;
+            self.pi_choice = ppi_index - (self.p_choice-1) * (num_pi_choices);
             self.cur_omega_x =  sqrt(self.x_radius2_est); %self.omega_x_ratios(x_choice) *
-            self.cur_omega_p =  sqrt(self.conservative_p_breg_dist); %self.omega_p_ratios(p_choice) *
-            self.cur_omega_pi = sqrt(self.conservative_pi_breg_dist);%self.omega_pi_ratios(pi_choice) * 
+            self.cur_omega_p =  sqrt(self.est_p_breg_dist); %self.omega_p_ratios(p_choice) *
+            self.cur_omega_pi = sqrt(self.est_pi_breg_dist);%self.omega_pi_ratios(pi_choice) * 
             self.cur_M_pi = sqrt(2) * self.cur_omega_pi;% CHEATING, valid only when smooth_pi = 0
             self.showGridParam(index);
         end
@@ -40,8 +40,8 @@ classdef NestrovTypeAlgorithm < Algorithm.FOAlgorithm
             num_ppi = num_p_choices * num_pi_choices;
             x_choice = floor((index-0.1) / (num_ppi)) + 1;
             ppi_index = index - num_ppi * (x_choice-1);
-            p_choice = floor((ppi_index-0.1) / num_p_choices) + 1;
-            pi_choice = ppi_index - (p_choice-1) * (num_p_choices);
+            p_choice = floor((ppi_index-0.1) / num_pi_choices) + 1;
+            pi_choice = ppi_index - (p_choice-1) * (num_pi_choices);
             % fprintf('param choice x %s, p_ratio: %s, pi_ratio %s\n', num2str(self.omega_x_ratios(x_choice)),num2str(self.omega_p_ratios(p_choice)), num2str(self.omega_pi_ratios(pi_choice)));
             
             str = sprintf( '%s %s %s', num2str(self.omega_x_ratios(x_choice)),num2str(self.omega_p_ratios(p_choice)), num2str(self.omega_pi_ratios(pi_choice)));
@@ -57,12 +57,18 @@ classdef NestrovTypeAlgorithm < Algorithm.FOAlgorithm
             while ~self.terminator.terminate()
                 [gamma_t_inv, mu_pi_t, mu_p_t, alpha_t] = self.getProxParams();
                 self.mytimer.start()
+
                 x_under = (1 - alpha_t) * self.cur_x + alpha_t * cur_x_temp;
+                % mu_pi = mu_pi_t
+                % cur_pis = self.cur_pis{1}
+
                 [self.cur_pis, indi_costs] = self.problem_data.projectPis(mu_pi_t, smooth_pis, x_under);
 %                 smooth_p
+
 %                 indi_costs
                 [self.cur_p, secon_grad, secon_cost] = self.problem_data.projectP(mu_p_t, smooth_p, indi_costs, self.cur_pis);
-                [cur_x_temp, ~] = self.problem_data.projectX(gamma_t_inv, cur_x_temp, secon_grad);
+                % fprintf('!!!!!!!!!!!!!!!!!!!!!!!!!!! iter %d', self.num_iters);
+                [cur_x_temp, ~] = self.problem_data.projectX(gamma_t_inv, cur_x_temp, secon_grad); 
                 cur_x = (1 - alpha_t) * self.cur_x + alpha_t * cur_x_temp;
                 [cur_val, ~] =self.problem_data.evalX(cur_x);
                 if cur_val < best_val
@@ -82,6 +88,8 @@ classdef NestrovTypeAlgorithm < Algorithm.FOAlgorithm
         function self = NestrovTypeAlgorithm(problem_data, terminator)
             self@Algorithm.FOAlgorithm(problem_data, terminator);
             self.num_param_choices = length(self.omega_x_ratios) * length(self.omega_p_ratios) * length(self.omega_pi_ratios);
+            % num_param_choices = self.num_param_choices
+            % length(self.omega_p_ratios)
         end
 
     end

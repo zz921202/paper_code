@@ -25,9 +25,10 @@ classdef FixedNestrov < Algorithm.NestrovTypeAlgorithm
             mu1 = mu;
             % mu1 = mu / (  1e3);
             
-            mu_p_t = mu1 * self.cp * self.cur_M_pi * self.Mt^2 * CONSTANT / self.cur_omega_p * self.omega_p_ratios(self.p_choice);
+            
 %             mu_p_t = 0;%TODO
             mu_pi_t = mu1 * self.Mt^2 * CONSTANT / self.cur_omega_pi * self.omega_pi_ratios(self.pi_choice);
+            mu_p_t = mu_pi_t * self.getOptimalSmoothingRatio() * self.omega_p_ratios(self.p_choice);
         end
 
         function str = getName(self)

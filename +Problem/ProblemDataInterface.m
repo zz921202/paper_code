@@ -1,6 +1,6 @@
 classdef ProblemDataInterface < handle
     properties
-        opt_val;
+        opt_val = -Inf;
         % m = 0;
         % n = 0;
         k = 0;
@@ -44,6 +44,8 @@ classdef ProblemDataInterface < handle
         %TODO 
         [para_str, time] = generateData(self, k)
         [omega_x2, omega_p2, omega_pi2, cp, Mt] = getParamsEstimate(self)
+        [omega_p2, ratio, A] = getProbParamEstimate(self)
+        [next_sigma, next_x, next_y] = projectZ(self, sigma, x, y, ind)
         % p_dist_est = getConservativePBregDist(self)
         % dist_est = getConservativePiBregDist(self)
         % mt = getMt(self)

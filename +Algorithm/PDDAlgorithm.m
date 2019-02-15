@@ -1,8 +1,10 @@
 classdef PDDAlgorithm < Algorithm.FOAlgorithm
     properties
-        omega_pi_ratios = [1,  0.5, 1e-1, 1e-2];
-        omega_p_ratios = [1,  0.5, 1e-1, 1e-2];
-        omega_x_ratios = [1,  0.5, 1e-1];
+        omega_pi_ratios = 10 .^ (-4:0);%[1,  0.5, 1e-1, 1e-2];
+        % omega_p_ratios = 10 .^ (-4:4);
+        omega_p_ratios = 10.^[-4:0];
+
+        omega_x_ratios = 10.^(-3:0);%[1,  0.5, 1e-1];
         cur_omega_p;
         cur_omega_pi;
         cur_M_pi;
@@ -14,7 +16,7 @@ classdef PDDAlgorithm < Algorithm.FOAlgorithm
         cur_upper;
         p_bar;
         pis_bar;
-        p_ratio;
+        % p_ratio;
         accum_p;
 
         x_choice;
@@ -37,8 +39,8 @@ classdef PDDAlgorithm < Algorithm.FOAlgorithm
             self.p_choice = floor((ppi_index-0.1) / num_pi_choices) + 1;
             self.pi_choice = ppi_index - (self.p_choice-1) * (num_pi_choices);
             self.cur_omega_x =  sqrt(self.x_radius2_est); %self.omega_x_ratios(x_choice) *
-            self.cur_omega_p =  sqrt(self.conservative_p_breg_dist); %self.omega_p_ratios(p_choice) *
-            self.cur_omega_pi = sqrt(self.conservative_pi_breg_dist);%self.omega_pi_ratios(pi_choice) * 
+            self.cur_omega_p =  sqrt(self.est_p_breg_dist); %self.omega_p_ratios(p_choice) *
+            self.cur_omega_pi = sqrt(self.est_pi_breg_dist);%self.omega_pi_ratios(pi_choice) * 
             self.cur_M_pi = sqrt(2) * self.cur_omega_pi;% CHEATING, valid only when smooth_pi = 0
             self.showGridParam(index);
         end
@@ -57,6 +59,8 @@ classdef PDDAlgorithm < Algorithm.FOAlgorithm
 
         function self = PDDAlgorithm(problem_data, terminator)
             self = self@Algorithm.FOAlgorithm(problem_data, terminator);
+            
+            % length(self.omega_x_ratios)
             self.num_param_choices = length(self.omega_x_ratios) * length(self.omega_p_ratios) * length(self.omega_pi_ratios);
             
         end
@@ -112,14 +116,20 @@ classdef PDDAlgorithm < Algorithm.FOAlgorithm
     methods(Access = private)%
         function  [lambda, sigma, eta, tau] = getProxParams(self)
             lambda = 1;
-            prob = self.problem_data; %TODO
-            self.p_ratio = (prob.beta - prob.alpha) / prob.alpha; % ALSO Hardcoded
-            A = prob.beta;
-            Mpi = sqrt(2) * self.cur_omega_pi;
 
-            sigma = self.cur_omega_x * self.Mt * (1 + sqrt(self.p_ratio)) / (Mpi) * self.omega_pi_ratios(self.pi_choice);
-            eta = self.Mt * Mpi * (self.cp * self.cur_omega_p + (1 + sqrt(self.p_ratio)) *A) / self.cur_omega_x * self.omega_x_ratios(self.x_choice);
-            tau = self.cp * self.Mt * Mpi * self.cur_omega_x / self.cur_omega_p * self.omega_p_ratios(self.p_choice);
+            Mpi = sqrt(2) * self.cur_omega_pi;
+            % cur_omega_p = self.cur_omega_p
+
+            sigma = self.cur_omega_x * self.Mt * (1 + sqrt(self.prob_ratio)) / (Mpi) * self.omega_pi_ratios(self.pi_choice);
+            eta = self.Mt * Mpi * (self.cp * self.cur_omega_p + (1 + sqrt(self.prob_ratio)) *self.A) / self.cur_omega_x * self.omega_x_ratios(self.x_choice);
+            if self.cur_omega_p < 1e-14
+                tau = 0;
+                % prob_ratio = self.prob_ratio
+                % A = self.A
+
+            else
+                tau = self.cp * self.Mt * Mpi * self.cur_omega_x / self.cur_omega_p * self.omega_p_ratios(self.p_choice);
+            end
 
             % lambda = 0;
             % sigma = 0;
@@ -131,9 +141,15 @@ classdef PDDAlgorithm < Algorithm.FOAlgorithm
             self.accum_p = self.accum_p + p;
             
             % self.x_history = [self.x_history, x];
+            self.x_bar = self.x_bar + 1/self.num_iters * (x - self.x_bar);
+            
+            % for ind = 1 : self.problem_data.k
+            %     self.pis_bar{ind} = self.pis_bar{ind} + 1 / self.num_iters * (pis{ind} - self.pis_bar{ind});
+            % end
             % x_bar = mean(self.x_history, 2);
-            % self.x_bar = self.x_bar + 1/self.num_iters * (x - self.x_bar);
+
             % x_bar = self.x_bar;
+            %%
             [x_val, ~] = self.problem_data.evalX(x);
             if x_val < self.cur_obj
                 self.cur_obj = x_val;
@@ -147,9 +163,10 @@ classdef PDDAlgorithm < Algorithm.FOAlgorithm
             for ind = 1: self.problem_data.k
                 self.pis_bar{ind} = self.pis_bar{ind} + p(ind) / self.accum_p(ind) * (pis{ind} - self.pis_bar{ind});
             end
-           
+           %%
             [cur_lower, ~] = self.problem_data.solveForX(self.p_bar, self.pis_bar);
-
+            [cur_lower1, ~] = self.problem_data.solveForX(p, pis);
+            cur_lower = max(cur_lower, cur_lower1); %what the hell, the theory does not say that, sigh.....
             if cur_lower > self.cur_lower
                 self.cur_lower = cur_lower;
                 self.cur_p = self.p_bar;
@@ -159,6 +176,8 @@ classdef PDDAlgorithm < Algorithm.FOAlgorithm
             self.cur_est_gap = self.cur_upper - self.cur_lower;
             
         end
+
+
 
 
     end

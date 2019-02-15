@@ -6,6 +6,7 @@ classdef LinearProblem < Problem.ProblemDataInterface
         x_projector = [];
         pi_projectors = {};
         p_projector = [];
+        z_projectors = {};
         % opt_val = 0;
         Tks = {};
         Wks = {};
@@ -22,7 +23,7 @@ classdef LinearProblem < Problem.ProblemDataInterface
         omega_pi2;
         omega_x2;
         BOXBOUNDX = 20;
-        
+        omega_p2;
 
     end
 
@@ -57,9 +58,28 @@ classdef LinearProblem < Problem.ProblemDataInterface
             bplus = [b; zeros(length(c), 1); ones(n, 1) * -self.BOXBOUNDX];
 
             self.x_projector.setConstraint(Aplus, bplus);
+            % initialize z projectors
 
-            self.generatePData( k);
+            
 
+
+            for ind = 1:k
+                cur_z_projector = self.EuclideanProjectorHandle();
+                obj_cons = [1, -c', -(eks{ind})'];
+                scen_cons_pos = [zeros(m2, 1), -Tks{ind}, Wks{ind}];
+                scen_cons_neg = [zeros(m2, 1), Tks{ind}, -Wks{ind}];
+                fir_cons = [zeros(m1, 1), A, zeros(m1, n2)];
+                non_neg_x = [zeros(n1, 1), eye(n1), zeros(n1, n2)];
+                non_neg_y = [zeros(n2, 1), zeros(n2, n1), eye(n2)];
+                lhs_cons = [obj_cons; scen_cons_pos; scen_cons_neg; fir_cons; non_neg_x; non_neg_y];
+                rhs_cons = [0; dks{ind}; -dks{ind}; b; zeros(n1+n2, 1)];
+                cur_z_projector.setConstraint(lhs_cons, rhs_cons);
+                self.z_projectors = [self.z_projectors; cur_z_projector];
+            end
+            % finish z projector init
+            self.generatePData(k);
+
+            
             myTimer = Helper.Timer();
             myTimer.start();
             self.opt_val = self.getReferenceObjective();
@@ -84,7 +104,7 @@ classdef LinearProblem < Problem.ProblemDataInterface
             for ind = 1: self.k
                 cur_grad = self.Tks{ind} * x + self.dks{ind};
                 cur_projector = self.pi_projectors(ind);
-                [cur_next_pi, neg_cost] = cur_projector.project(prox_param, prox_centers{ind}, -cur_grad);
+                [cur_next_pi, neg_cost] = cur_projector.project(prox_param, prox_centers{ind}, -cur_grad);%%TODO
                 next_pis = [next_pis, cur_next_pi];
                 indi_costs = [indi_costs; -neg_cost];
             end
@@ -105,10 +125,13 @@ classdef LinearProblem < Problem.ProblemDataInterface
         end
 
         function [total_cost, x] = solveForX(self, p, pis)
-            [~, n] = size(self.A);
+%             [~, n] = size(self.A);
+            n = self.n1;
+            
             second_stage_grad = zeros(n, 1);
             additional_cost = 0;% cost associated with p * <pik, dk>
             for ind = 1: self.k
+%                 pis{ind}
                 second_stage_grad = second_stage_grad + p(ind) * (self.Tks{ind})' * pis{ind};
                 additional_cost = additional_cost + (self.dks{ind})' * pis{ind} * p(ind);
             end
@@ -147,15 +170,32 @@ classdef LinearProblem < Problem.ProblemDataInterface
 
         function [omega_x2, omega_p2, omega_pi2, cp, Mt] = getParamsEstimate(self)
             omega_x2 = self.omega_x2;
+            
             Mt = self.Mt;
             omega_pi2 = self.omega_pi2;
             cp = self.getCp();
-            omega_p2 = self.getConservativePBregDist();
+            [omega_p2, ~, ~] = self.getProbParamEstimate();
         end
         function cost = evalFakeCost(self, x, p_param, p_center, pi_param, pi_center)
             [pis, indi_costs] = self.projectPis(pi_param, pi_center, x);
             [~, ~, second_cost] = self.projectP(p_param, p_center, indi_costs, pis);
             cost = (self.c)' * x + second_cost;
+        end
+
+        function [next_sigma, next_x, next_y] = projectZ(self, sigma, x, y, ind)
+%             sigma
+%             x
+%             y
+            z_center = [sigma; x; y];
+            
+            % self.z_projectors(1)
+            
+            cur_projector = self.z_projectors(ind);
+            total_len = 1 + self.n1 + self.n2;
+            [next_z, ~]= cur_projector.project(1, z_center, zeros(total_len, 1));
+            next_sigma = next_z(1);
+            next_x = next_z(2: (1+ self.n1));
+            next_y = next_z((2+self.n1):total_len);
         end
     end
 

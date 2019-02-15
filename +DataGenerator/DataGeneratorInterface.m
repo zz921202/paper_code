@@ -13,6 +13,11 @@ classdef DataGeneratorInterface < handle
 
     methods 
         function [mat, largest_eig] =randMatrixEig(self, m, n, start_value, end_value)
+            if m == 0 
+                mat = [];
+                largest_eig = 0;
+                return;
+            end
             mat = rand(m, n) * (end_value - start_value) + start_value;
             [U,S,V] = svd(mat);
             l = min(m, n);
@@ -20,6 +25,7 @@ classdef DataGeneratorInterface < handle
             add_eig(1:l, 1:l) = self.EIGENMIN;
             new_S = S+ add_eig;
             mat = U * (new_S) * V';
+            
             largest_eig  = new_S(1, 1);
         end 
 
