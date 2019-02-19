@@ -20,13 +20,13 @@ classdef LinearRatioUncertainty < Problem.LinearProblem
             elseif projector_name == "Euclidean"
                 self.p_projector = Helper.EuclideanProjector();
             elseif projector_name == "BoxEntropy"
-                self.box_projector = Helper.BoxPProjector.BoxPEntropyProjector();
+                self.box_projector = Helper.BoxPProjector.VectorBoxPEntropyProjector();
                 self.box_projector_flag = true;
                 self.p_projector = Helper.EntropyProjector();
                 DELTA = 1e-16;
                 self.distance_handle = @(x, y) sum((y + DELTA).* (log(y + DELTA) - log(x + DELTA)));
             elseif projector_name == "BoxEuclidean"
-                self.box_projector = Helper.BoxPProjector.BoxPEuclideanProjector();
+                self.box_projector = Helper.BoxPProjector.VectorBoxPEuclideanProjector();
                 self.p_projector = Helper.EuclideanProjector();
                 self.box_projector_flag = true;
             else
@@ -44,7 +44,8 @@ classdef LinearRatioUncertainty < Problem.LinearProblem
             b = [-1 ; 1; -self.beta * self.reference_p; self.alpha * self.reference_p; zeros(k, 1)];
             self.p_projector.setConstraint(A, b);
             if self.box_projector_flag
-                self.box_projector.setConstraint(self.reference_p * self.alpha, self.reference_p * self.beta);
+                self.box_projector.setUpperLowerConstraint(self.reference_p * self.alpha, self.reference_p * self.beta);
+                self.box_projector.setConstraint(A, b);
             end
 
         end
@@ -185,18 +186,20 @@ classdef LinearRatioUncertainty < Problem.LinearProblem
 
     methods(Access = private)
         function [next_p, val] = fast_PProject(self, prox_param, prox_center, grad)
-            try
-                
+            % try
+                % prox_center
+                % grad
                 [next_p, val]  = self.box_projector.project(prox_param, prox_center, grad);
+                % next_p
                 if any(isnan(next_p))
-                     % fprintf('hello\n')
+                     fprintf('hello\n')
                     [next_p, val] = self.p_projector.project(prox_param, prox_center, grad);
 
                 end
-            catch
-                % fprintf('hello    000\n')
-                [next_p, val] = self.p_projector.project(prox_param, prox_center, grad);
-            end
+            % catch
+            %     fprintf('hello    000\n')
+            %     [next_p, val] = self.p_projector.project(prox_param, prox_center, grad);
+            % end
         end
     end
 end

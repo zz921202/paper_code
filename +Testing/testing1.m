@@ -1,8 +1,8 @@
 alg_handles = {@Algorithm.Subgradient, @Algorithm.FixedNestrov, @Algorithm.DynamicNestrov, @Algorithm.PDDAlgorithm, ...
         @Algorithm.DSLAlgorithm, @Algorithm.ABPAlgorithm};
 alg_handles = { @Algorithm.DynamicNestrov}% @Algorithm.PDDAlgorithm}
-best_writer = Helper.Writer('/Users/Zhe/Desktop/result/nes3_entropy_best.csv');
-raw_writer = Helper.Writer('/Users/Zhe/Desktop/result/nes3_entropy_raw.csv');
+best_writer = Helper.Writer('/Users/Zhe/Desktop/result/test_fun.csv');
+raw_writer = Helper.Writer('/Users/Zhe/Desktop/result/test_fun.csv');
 best_writer.write('\n\n')
 raw_writer.write('\n\n')
 algs = [];

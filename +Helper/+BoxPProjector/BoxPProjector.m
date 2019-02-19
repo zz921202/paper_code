@@ -6,7 +6,7 @@ classdef BoxPProjector < handle
     end
     
     methods
-        function setConstraint(self, lower_probs, upper_probs)
+        function setUpperLowerConstraint(self, lower_probs, upper_probs)
             k = length(upper_probs);
             self.k = k;
             self.lower_prob_sum = sum(lower_probs);

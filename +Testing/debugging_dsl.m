@@ -1,6 +1,6 @@
-k = 100;
-n = 20;
-m = n/2;
+k = 1000;
+m = 20;
+n = m * 2;
 
 % pis = {};
 % for i = 1: k
@@ -11,11 +11,11 @@ indi_costs = zeros(k, 1);
 indi_costs(1) = 1;
 mat_gen = DataGenerator.SimpleCompleteRecourseRandomData(m,n);
 
-ref_problem = Problem.LinearRatioUncertainty(mat_gen,  'BoxEntropy');
+ref_problem = Problem.ToyLinearProblem(mat_gen,  'BoxEntropy');
 ref_problem.alpha = 0;%x
 ref_problem.beta = k;
 % rng(3)
-rng(20)
+rng(100)
 ref_problem.generateData(k);
 
 
