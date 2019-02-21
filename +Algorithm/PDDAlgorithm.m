@@ -1,10 +1,10 @@
 classdef PDDAlgorithm < Algorithm.FOAlgorithm
     properties
-        omega_pi_ratios = 10 .^ (-4:-1);%[1,  0.5, 1e-1, 1e-2];
+        omega_pi_ratios = 10 .^ (-4:0);%[1,  0.5, 1e-1, 1e-2];
         % omega_p_ratios = 10 .^ (-4:4);
-        omega_p_ratios = 10.^[-4:1];
+        omega_p_ratios = 10.^[-4:0];
 
-        omega_x_ratios = 10.^(-3:-1);%[1,  0.5, 1e-1];
+        omega_x_ratios = 10.^(-3:0);%[1,  0.5, 1e-1];
         cur_omega_p;
         cur_omega_pi;
         cur_M_pi;

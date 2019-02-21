@@ -72,9 +72,9 @@ classdef RatioAmbiguitySet < Problem.ProbabilityAmbiguitySet
             end
 
             ratio = (self.beta - self.alpha) / self.alpha;
-            ratio = min(ratio, 1000);
+            ratio = min(ratio, 5000);
             A = min(self.beta, self.k);
-            A = min(A, 50);
+            A = min(A, sqrt(5000));
             ascending_vec = (1:self.k)';
             [~, p1] = self.solveForP(ascending_vec);
             [~, p2] = self.solveForP(-ascending_vec);
