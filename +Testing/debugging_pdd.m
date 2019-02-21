@@ -1,24 +1,11 @@
-k = 99;
-m = 100;
-n = m * 2;
-
-pis = {};
-for i = 1: k
-    pis = [pis, ones(m,1)];
-end
-
-mat_gen = DataGenerator.ToyRecourseRandomDataGenerator(m,n);
-
-ref_problem = Problem.ToyLinearProblem(mat_gen,  'Euclidean');
-ref_problem.alpha = 0.05;
-ref_problem.beta = 20;
-% ref_problem.alpha = 1;%x
-% ref_problem.beta = 1;
-% ref_problem.alpha = 1;
-% ref_problem.beta = 1;
-rng(10)
-ref_problem.generateData(k);
-[omega_x2, omega_p2, omega_pi2, cp, Mt] = ref_problem.getParamsEstimate()
+k = 100;
+rng_seed = 116;
+m = 20;
+n = 40;
+dist = 'BoxEntropy';
+alpha = 1/100;
+beta =k;
+ref_problem = Testing.getRefProblem(n,m, k, alpha, beta, rng_seed, dist)
 
 terminator = Algorithm.Terminator.MaxIterTerminator();
 terminator.MAXITERATION = 20;

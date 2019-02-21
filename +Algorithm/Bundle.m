@@ -40,10 +40,12 @@ classdef Bundle < handle
         end
         
 
-        function [next_x, val] = project(self, x_0)            
+        function [next_x, val] = project(self, x_0)
+ 
             self.loadConstraint();
             n = length(x_0);
             [next_x, val] = self.projector.project(1, x_0, zeros(n, 1));
+            
         end
 
         function [obj, soln] = solve(self, grad)
@@ -62,6 +64,7 @@ classdef Bundle < handle
     methods(Access = private)
 
         function [A,b] =loadConstraint(self)
+           
             if ~isempty(self.b_support)
                 A = [self.A; self.A_support];
                 b = [self.b; self.b_support];
@@ -69,8 +72,11 @@ classdef Bundle < handle
                 A = self.A;
                 b = self.b;
             end
-            % A_ = full(A)
-            % b = b
+%             original_A = full(self.A)
+%             original_b = self.b
+%             self.b_support
+%             self.A_support
+%             aug_b = b
             % fprintf('additional constrs %s', num2str(length(b)) );
             self.projector.setConstraint(A,b);
         end

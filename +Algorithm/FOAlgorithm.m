@@ -75,8 +75,8 @@ classdef FOAlgorithm < handle
             terminator.setFOAlgorithm(self);
             self.terminator = terminator;
             self.problem_data = problem_data; % problem 
-            [omega_x2, ~, omega_pi2, cp, Mt] = problem_data.getParamsEstimate();
-            [omega_p2, ratio, A] = problem_data.getProbParamEstimate();
+            [omega_x2, omega_pi2, Mt] = problem_data.getParamsEstimate();
+            [omega_p2, ratio, A, cp] = problem_data.getProbParamEstimate();
             self.cp = cp;
             self.Mt = Mt;
             self.prob_ratio = ratio;

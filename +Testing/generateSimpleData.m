@@ -1,10 +1,10 @@
 function problems =generateSimpleData()
-    rng_seeds = 100;
+    rng_seeds = 100:100:300;
     max_iters = [200];
-    num_rows = [20];
+    num_rows = [200];   
     num_scenarios = [1000];
-    breg_dists = {'BoxEntropy', 'BoxEuclidean', 'Euclidean'};
-    % beta_alpha_pairs = {[0, 10000]};% [0 10], [0 100], [0 1000]};
+    breg_dists = {'BoxEntropy'};
+    beta_alpha_pairs = {[1/40, 40], [1/100 100], [1/200, 200], [0 1000]}%, [1/400 400], [0 1000]};
     beta_alpha_pairs = {[0 20000]}
     problems = [];
     %%%%%%%%%%%%%%%

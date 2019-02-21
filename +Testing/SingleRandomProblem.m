@@ -15,11 +15,13 @@ classdef SingleRandomProblem < Testing.SingleProblemInterface
         function ref_problem = generateData(self) % generate a Problem Data to put inside 
             % mat_gen = DataGenerator.SimpleCompleteRecourseRandomData(self.num_rows, self.num_rows * 2); 
             mat_gen = DataGenerator.ToyRecourseRandomDataGenerator(self.num_rows, self.num_rows * 2); 
-
-            ref_problem = Problem.ToyLinearProblem(mat_gen,  self.breg_dist);
-            rng(self.rng_seed);
-            ref_problem.alpha = self.alpha;
-            ref_problem.beta = self.beta;
+            ambiguity_set = Problem.RatioAmbiguitySet(self.breg_dist);
+            ambiguity_set.alpha = self.alpha;
+            ambiguity_set.beta = self.beta;
+            ref_problem = Problem.ToyLinearProblem(mat_gen,  ambiguity_set);
+            
+            % ref_problem.alpha = self.alpha;
+            % ref_problem.beta = self.beta;
             rng(self.rng_seed)
             ref_problem.generateData(self.num_scenarios);
 

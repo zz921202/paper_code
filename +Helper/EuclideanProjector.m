@@ -8,7 +8,7 @@ classdef EuclideanProjector < Helper.LinearProjectorInterface
 %                 prox_center
 %                 prox_param
 %                 grad
-%                 full(self.model.A)
+% %                 full(self.model.A)
 %                 self.model.rhs
                 self.modelq = self.model;
                 self.modelq.obj = grad - prox_param * prox_center;

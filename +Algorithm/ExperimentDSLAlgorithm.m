@@ -178,7 +178,7 @@ classdef ExperimentDSLAlgorithm < Algorithm.FOAlgorithm
         function flag = updateRadiusEstimate(self, p, pis)
             % hard-coding 
             p_radius = norm(p - self.smooth_p, 2);
-            if self.problem_data.box_projector_flag 
+            if self.problem_data.isEntropy
                 % p
                 % p .* (log(p) - log(self.smooth_p))
                 radius_sq = real(sum((p + 1e-16) .* (log(p + 1e-16) - log(self.smooth_p + 1e-16))));

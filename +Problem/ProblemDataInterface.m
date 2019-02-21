@@ -23,7 +23,7 @@ classdef ProblemDataInterface < handle
             %   returns all pis CONVERSION to min problem carried out inside the function
 
         %% handles evaluation, quality of solution 
-        optimal_val = getReferenceObjective(self)
+        % optimal_val = getReferenceObjective(self)
             % a copy will be stored as RefObjective
         [objective_val, gap] = evalX(self, x)
         [total_cost, x] = solveForX(self, p, pis)
@@ -43,13 +43,14 @@ classdef ProblemDataInterface < handle
 
         %TODO 
         [para_str, time] = generateData(self, k)
-        [omega_x2, omega_p2, omega_pi2, cp, Mt] = getParamsEstimate(self)
-        [omega_p2, ratio, A] = getProbParamEstimate(self)
+        [omega_x2, omega_pi2 , Mt] = getParamsEstimate(self)
+        [omega_p2, ratio, A, cp] = getProbParamEstimate(self)
         [next_sigma, next_x, next_y] = projectZ(self, sigma, x, y, ind)
         % p_dist_est = getConservativePBregDist(self)
         % dist_est = getConservativePiBregDist(self)
         % mt = getMt(self)
         % getPRatio(self)
-
+        [table] = getDistanceTable(self)
+        flag = isEntropy(self)
     end
 end

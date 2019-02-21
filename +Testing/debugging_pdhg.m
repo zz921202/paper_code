@@ -1,18 +1,11 @@
-k = 20;
+k = 10;
+rng_seed = 100;
+m = 20;
 n = 40;
-m = n/2;
-
-
-mat_gen = DataGenerator.SimpleCompleteRecourseRandomData(m,n);
-
-ref_problem = Problem.LinearRatioUncertainty(mat_gen,  'Euclidean');
-% ref_problem.alpha = 1;%x
-% ref_problem.beta = 1;
-% ref_problem.alpha = 1;
-% ref_problem.beta = 1;
-rng(10)
-ref_problem.generateData(k);
-
+dist = 'BoxEntropy';
+alpha = 0;
+beta =k;
+ref_problem = Testing.getRefProblem(n,m, k, alpha, beta, rng_seed, dist)
 
 terminator = Algorithm.Terminator.MaxIterTerminator();
 terminator.MAXITERATION = 20;

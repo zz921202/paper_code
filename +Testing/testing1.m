@@ -1,8 +1,8 @@
 alg_handles = {@Algorithm.Subgradient, @Algorithm.FixedNestrov, @Algorithm.DynamicNestrov, @Algorithm.PDDAlgorithm, ...
         @Algorithm.DSLAlgorithm, @Algorithm.ABPAlgorithm};
-alg_handles = { @Algorithm.DynamicNestrov}% @Algorithm.PDDAlgorithm}
-best_writer = Helper.Writer('/Users/Zhe/Desktop/result/test_fun.csv');
-raw_writer = Helper.Writer('/Users/Zhe/Desktop/result/test_fun.csv');
+alg_handles = { @Algorithm.PDDAlgorithm}% @Algorithm.PDDAlgorithm}
+best_writer = Helper.Writer('../result/modify_pdd_raw.csv');
+raw_writer = Helper.Writer('../result/modify_pdd_best.csv');
 best_writer.write('\n\n')
 raw_writer.write('\n\n')
 algs = [];

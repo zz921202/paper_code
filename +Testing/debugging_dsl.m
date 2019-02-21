@@ -1,23 +1,11 @@
-k = 1000;
+k = 10;
+rng_seed = 100;
 m = 20;
-n = m * 2;
-
-% pis = {};
-% for i = 1: k
-%     pis = [pis, ones(m,1)];
-% end
-
-indi_costs = zeros(k, 1);
-indi_costs(1) = 1;
-mat_gen = DataGenerator.SimpleCompleteRecourseRandomData(m,n);
-
-ref_problem = Problem.ToyLinearProblem(mat_gen,  'BoxEntropy');
-ref_problem.alpha = 0;%x
-ref_problem.beta = k;
-% rng(3)
-rng(100)
-ref_problem.generateData(k);
-
+n = 40;
+dist = 'BoxEntropy';
+alpha = 0;
+beta =k;
+ref_problem = Testing.getRefProblem(n,m, k, alpha, beta, rng_seed, dist)
 
 max_iter_terminator = Algorithm.Terminator.MaxIterTerminator();
 est_gap_teminator = Algorithm.Terminator.EstGapTerminator();

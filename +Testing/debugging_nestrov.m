@@ -1,21 +1,11 @@
-k = 20;
+k = 10;
+rng_seed = 100;
+m = 20;
 n = 40;
-m = n/2;
-
-pis = {};
-% for i = 1: k
-%     pis = [pis, ones(m,1)];
-% end
-
-indi_costs = zeros(k, 1);
-indi_costs(1) = 1;
-mat_gen = DataGenerator.ToyRecourseRandomDataGenerator(m,n);
-
-ref_problem = Problem.ToyLinearProblem(mat_gen,  'Euclidean');
-ref_problem.alpha = .5;%x
-ref_problem.beta = 20;
-% rng(10)
-ref_problem.generateData(k);
+dist = 'BoxEntropy';
+alpha = 0;
+beta =k;
+ref_problem = Testing.getRefProblem(n,m, k, alpha, beta, rng_seed, dist)
 % tic
 % [ref_p, ref_grad, ref_cost] = ref_problem.projectP(1, ones(k,1)/ k, indi_costs, pis)
 % toc
