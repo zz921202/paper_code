@@ -63,7 +63,7 @@ classdef VectorBoxPProjector < Helper.LinearProjectorInterface
             next_start_idx = start_idx; next_end_idx = end_idx;
             search_idx = floor((start_idx + end_idx)/2);
             cur_lam = self.combined_sorted_lambda_val(search_idx);
-            % search_idx
+            % fprintf('current search idx is %d \n', search_idx)
             if search_idx + 1 > self.k * 2
                 next_lam = Inf;
             else
@@ -95,11 +95,12 @@ classdef VectorBoxPProjector < Helper.LinearProjectorInterface
             end
 
             guess_lambda  = self.computeLambda(active_base_indicator, 1 - fixed_val);
-            if guess_lambda < cur_lam
-                % fprintf('updating lower search %d', search_idx)
+            if guess_lambda < cur_lam - 1e-10
+                % fprintf('updating upper %d\n', search_idx)
                 next_end_idx = search_idx;
                 % next_start_idx = start_idx;
-            elseif guess_lambda > next_lam
+            elseif guess_lambda > next_lam + 1e-10
+                % fprintf('updating lower %d\n', search_idx+1)
                 % next_end_idx = end_idx;
                 next_start_idx = search_idx + 1;
             else 

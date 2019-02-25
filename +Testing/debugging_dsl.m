@@ -1,11 +1,22 @@
-k = 10;
+k = 1000;
 rng_seed = 100;
-m = 20;
-n = 40;
-dist = 'BoxEntropy';
+m = 100;
+n = 200;
+dist = 'Euclidean';
 alpha = 0;
-beta =k;
-ref_problem = Testing.getRefProblem(n,m, k, alpha, beta, rng_seed, dist)
+beta =100;
+radius = 200;
+% ref_problem = Testing.getRefProblem(n,m, k, alpha, beta, rng_seed, dist)
+% ref_problem = Testing.getRefTransportProblem(n, m, k, rng_seed, dist, radius)
+
+mat_gen = DataGenerator.ToyRecourseRandomDataGenerator(m,n);
+ambiguity_set = Problem.TransportUncertainty(dist);
+ambiguity_set.epsilon = radius;
+
+ref_problem = Problem.ToyLinearProblem(mat_gen,  ambiguity_set);
+rng(rng_seed);
+ref_problem.generateData(k);
+
 
 max_iter_terminator = Algorithm.Terminator.MaxIterTerminator();
 est_gap_teminator = Algorithm.Terminator.EstGapTerminator();

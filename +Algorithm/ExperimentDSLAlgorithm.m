@@ -31,22 +31,22 @@ classdef ExperimentDSLAlgorithm < Algorithm.FOAlgorithm
     methods
         
         function setGridParam(self, index)
-            num_p = length(self.omega_p_ratios);
-            pi_index = floor((index-0.1)/num_p) + 1;
-            self.OMEGAPI = self.OMEGAPIS(pi_index);
-            p_index = index - (pi_index -1) * num_p;
-            self.cur_p_estimate = sqrt(self.est_p_breg_dist) * self.omega_p_ratios(p_index);
+            % num_p = length(self.omega_p_ratios);
+            % pi_index = floor((index-0.1)/num_p) + 1;
+            % self.OMEGAPI = self.OMEGAPIS(pi_index);
+            % p_index = index - (pi_index -1) * num_p;
+            % self.cur_p_estimate = sqrt(self.est_p_breg_dist) * self.omega_p_ratios(p_index)
         end
         % disp parameter choice in words
         % just call showGridParam 
         function str = showGridParam(self, index)
             % fprintf('p ratio is %s\n', num2str(self.omega_p_ratios(index)));
-             num_p = length(self.omega_p_ratios);
-            pi_index = floor((index-0.1)/num_p) + 1;
-            self.OMEGAPI = self.OMEGAPIS(pi_index);
-            p_index = index - (pi_index -1) * num_p;
+            %  num_p = length(self.omega_p_ratios);
+            % pi_index = floor((index-0.1)/num_p) + 1;
+            % self.OMEGAPI = self.OMEGAPIS(pi_index);
+            % p_index = index - (pi_index -1) * num_p;
             
-            str = sprintf('_ %s %s', num2str(self.omega_p_ratios(p_index)), num2str(self.OMEGAPIS(pi_index)));
+            % str = sprintf('_ %s %s', num2str(self.omega_p_ratios(p_index)), num2str(self.OMEGAPIS(pi_index)));
             
         end
 
@@ -57,13 +57,13 @@ classdef ExperimentDSLAlgorithm < Algorithm.FOAlgorithm
             self.cst_ratio = 2^-5;
             x0 = self.problem_data.getInitialX();
             [indi_costs, pi0] = self.problem_data.solveForPis(x0);
-            [p0, secon_grad, secon_costs] = self.problem_data.projectP(0, self.smooth_p, indi_costs, pi0);
+            [p0, secon_grad, secon_costs, dist0] = self.problem_data.projectP(0, self.smooth_p, indi_costs, pi0);
             linear_approx_grad = self.problem_data.c + secon_grad;
             cst_offset = secon_costs - secon_grad' * x0;
             self.bundle = Algorithm.Bundle(self.problem_data);
             [obj, x1] = self.bundle.solve(linear_approx_grad);
             self.phase_lower = obj + cst_offset;
-            self.updateRadiusEstimate(p0, pi0);
+            self.updateRadiusEstimate(dist0, pi0);
             
             [obj_x0, ~] = self.problem_data.evalX(x0);
             [obj_x1, ~] = self.problem_data.evalX(x1);
@@ -99,7 +99,7 @@ classdef ExperimentDSLAlgorithm < Algorithm.FOAlgorithm
                 x_tl = (1 - alpha_t) * self.cur_x + alpha_t * x_t;
 %                 self.phase_mu_pi
                 [pisl, indi_costs] = self.problem_data.projectPis(self.phase_mu_pi, self.smooth_pis, x_tl);
-                [pl, secon_grad, secon_costs] = self.problem_data.projectP(self.phase_mu_p, self.smooth_p, indi_costs, pisl);
+                [pl, secon_grad, secon_costs, dist_est_pl] = self.problem_data.projectP(self.phase_mu_p, self.smooth_p, indi_costs, pisl);
                 % [cur_x_temp, total_cost] = self.problem_data.projectX(gamma_t_inv, cur_x_temp, secon_grad);
                 obj_vec = self.problem_data.c + secon_grad;%TODO change for more general f composition
                 cst_offset = secon_costs - secon_grad' * x_tl;
@@ -135,8 +135,15 @@ classdef ExperimentDSLAlgorithm < Algorithm.FOAlgorithm
 
                 %MAYBE NOT NEEDED in practice
                 [tmd_pis, indi_costs] = self.problem_data.projectPis(self.phase_mu_pi, self.smooth_pis, x_tmd);
-                [p_tmd, secon_grad, secon_cost] = self.problem_data.projectP(self.phase_mu_p, self.smooth_p, indi_costs, tmd_pis);
+                [p_tmd, secon_grad, secon_cost, dist_est_tmd] = self.problem_data.projectP(self.phase_mu_p, self.smooth_p, indi_costs, tmd_pis);
                 tmd_cost = secon_cost + x_tmd' * self.problem_data.c;
+                
+                
+                if self.updateRadiusEstimate(dist_est_pl, pisl) || self.updateRadiusEstimate(dist_est_tmd, tmd_pis)
+                    self.terminate_phase(cur_lower, self.cur_omega_pi2_estimate);
+                    break
+                end
+
                 if tmd_cost < (self.phase_upper_threshold -self.phase_l)*0.5 + self.phase_l
                     self.cst_ratio = self.cst_ratio * 2;
                     fprintf('iter: %d updating cst ratio to %s\n', self.num_iters, num2str(self.cst_ratio));
@@ -145,10 +152,7 @@ classdef ExperimentDSLAlgorithm < Algorithm.FOAlgorithm
 
                 end
 
-                if self.updateRadiusEstimate(pl, pisl) || self.updateRadiusEstimate(p_tmd, tmd_pis)
-                    self.terminate_phase(cur_lower, self.cur_omega_pi2_estimate);
-                    break
-                end
+                
                 % Q = max(Helper.computeMaxL2norm2(tmd_pis), Helper.computeMaxL2norm2(cur_pis));
                 % fprintf('iter: %d current radius is %s \n', self.num_iters ,num2str(Q));
                 % if Q > self.cur_omega_pi2_estimate
@@ -175,15 +179,16 @@ classdef ExperimentDSLAlgorithm < Algorithm.FOAlgorithm
             self.recordObjTime();
         end
 
-        function flag = updateRadiusEstimate(self, p, pis)
+        function flag = updateRadiusEstimate(self, p_dist_est, pis)
             % hard-coding 
-            p_radius = norm(p - self.smooth_p, 2);
-            if self.problem_data.isEntropy
-                % p
-                % p .* (log(p) - log(self.smooth_p))
-                radius_sq = real(sum((p + 1e-16) .* (log(p + 1e-16) - log(self.smooth_p + 1e-16))));
-                p_radius = sqrt(radius_sq);
-            end
+            % p_radius = norm(p - self.smooth_p, 2);
+            % if self.problem_data.isEntropy
+            %     % p
+            %     % p .* (log(p) - log(self.smooth_p))
+            %     radius_sq = real(sum((p + 1e-16) .* (log(p + 1e-16) - log(self.smooth_p + 1e-16))));
+            %     p_radius = sqrt(radius_sq);
+            % end
+
             pis_radius_sq = Helper.computeMaxL2norm2(pis);
             % pis_radius_sq_sum = 0;
             % for ind = 1: length(pis)
@@ -191,13 +196,15 @@ classdef ExperimentDSLAlgorithm < Algorithm.FOAlgorithm
             % end
             % pi_radius_sq = pis_radius_sq_sum / (self.cp^2);
             flag = false;
-            if p_radius > self.cur_p_estimate
-                self.cur_p_estimate = p_radius * 1.2;
+            p_radius_est = sqrt(p_dist_est);
+            if p_radius_est > self.cur_p_estimate
+                self.cur_p_estimate = p_radius_est * 2;
                 fprintf('iter: %d p_estimate enlarging to %s \n', self.num_iters, num2str(self.cur_p_estimate));
                 flag = true;
             end
+
             if pis_radius_sq > self.cur_omega_pi2_estimate
-                self.cur_omega_pi2_estimate = pis_radius_sq * 1.2;
+                self.cur_omega_pi2_estimate = pis_radius_sq * 2;
                 fprintf('iter: %d pi_estimate enlarging to %s \n', self.num_iters, num2str(self.cur_omega_pi2_estimate) );
                 flag = true;
             end
@@ -207,17 +214,20 @@ classdef ExperimentDSLAlgorithm < Algorithm.FOAlgorithm
         function init_phase(self)
 %             v_lower = self.phase_lower;
             [v_upper, ~] = self.problem_data.evalX(self.phase_x0);
-     
+            % fprintf('cur_iter: %d for initialization \n\n', self.num_iters)
 %             phase_l = self.BETA * v_lower + (1 - self.BETA) * v_upper
             self.phase_l = self.BETA * self.phase_lower + (1 - self.BETA) * v_upper;
-            
+            % pi2_est =self.cur_omega_pi2_estimate
+            % p_est = self.cur_p_estimate
+            % cp_est = self.cp
             mu = (self.THETA * (v_upper - self.phase_l)) / (self.cst_ratio * 2 * self.cur_omega_pi2_estimate *(1 + sqrt(2) * self.cur_p_estimate * self.cp));
             if self.cur_p_estimate < 1e-14
                 optimal_ratio = 0;
             else
                 optimal_ratio = self.cur_omega_pi2_estimate * self.cp * sqrt(2) / self.cur_p_estimate;
             end
-
+            % mu
+            % optimal_ratio
             self.phase_mu_p = mu * optimal_ratio;
             self.phase_mu_pi = mu;
             % self.phase_mu_p = 0;

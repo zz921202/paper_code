@@ -3,6 +3,7 @@ classdef ABPAlgorithm < Algorithm.DSLAlgorithm
     methods
 
           function  dslPhase(self)
+            % fprintf('phase lower is %s\n', num2str(self.phase_lower));
             self.init_phase();
             
             t = 1;
@@ -10,6 +11,8 @@ classdef ABPAlgorithm < Algorithm.DSLAlgorithm
             x_t = self.cur_x;            
             cur_lower = self.phase_lower;
             [cur_upper, ~] = self.problem_data.evalX(self.phase_x0);
+            % self.phase_x0
+            % fprintf('^^^^^^^^cur_upper is %s', num2str(cur_upper));
             self.bundle = Algorithm.Bundle(self.problem_data);
             self.bundle.LIMIT = 100;
             while ~self.terminator.terminate()
@@ -34,8 +37,10 @@ classdef ABPAlgorithm < Algorithm.DSLAlgorithm
                 if cur_lower > self.phase_lower_threshold
 %                     self
 %                     self.phase_lower_threshold
+                    % fprintf('cur upper %s minus lower is %s  ', num2str(cur_upper), num2str(cur_upper - cur_lower))
                     fprintf('iter %s : terminating in lower bound improvement %s -> %s\n', num2str(self.num_iters), num2str(self.phase_lower_threshold), num2str(cur_lower))
                     self.terminate_phase(cur_lower, self.cur_omega_pi2_estimate);
+
                     break;
                 end
                 b = self.phase_l - cst_offset;
@@ -76,9 +81,15 @@ classdef ABPAlgorithm < Algorithm.DSLAlgorithm
             end
         end
         
-            function init_phase(self)
+        function init_phase(self)
 %             v_lower = self.phase_lower;
             [v_upper, ~] = self.problem_data.evalX(self.phase_x0);
+            % [v_upper1, ~] = self.problem_data.evalX(self.phase_x0)
+            % [v_upper2, ~] = self.problem_data.evalX(self.phase_x0)
+            % [v_upper3, ~] = self.problem_data.evalX(self.phase_x0)
+
+            % self.phase_x0
+            % fprintf('upper is %s', num2str(v_upper));
      
 %             phase_l = self.BETA * v_lower + (1 - self.BETA) * v_upper
             self.phase_l = self.BETA * self.phase_lower + (1 - self.BETA) * v_upper;
@@ -92,6 +103,7 @@ classdef ABPAlgorithm < Algorithm.DSLAlgorithm
             self.phase_lower_threshold = self.phase_l - self.THETA * (self.phase_l - self.phase_lower);
 %             self.phase_lower_threshold
             self.phase_upper_threshold = self.phase_l + self.THETA*(v_upper - self.phase_l);
+            % fprintf('!!!!!!!!! phase lower is %s<- %s->%s phase l \n', num2str(self.phase_lower), num2str(self.phase_lower_threshold), num2str(self.phase_l));
         end
 
         function self  = ABPAlgorithm(problem_data, terminator)

@@ -173,14 +173,19 @@ classdef LinearProblem < Problem.ProblemDataInterface
         end
 
         function table = getDistanceTable(self)
-            table = [];
-            error('to be implemented');
+            table = zeros(self.k, self.k);
+            for i = 1: self.k
+                for j = 1: self.k
+                    table(i, j) = norm(self.dks{i} - self.dks{j});
+                end
+            end
+            
         end
 
         function optimal_val = getReferenceObjective(self)
                                     
             est_gap_terminator = Algorithm.Terminator.EstGapTerminator();
-            est_gap_terminator.GAP = 1e-1;
+            est_gap_terminator.GAP = 1e-3;
             max_iter_terminator = Algorithm.Terminator.MaxIterTerminator();
             max_iter_terminator.MAXITERATION = 500;
             terminator = Algorithm.Terminator.CompositeTerminator({max_iter_terminator, est_gap_terminator});
@@ -259,8 +264,14 @@ classdef LinearProblem < Problem.ProblemDataInterface
         function init_p = getInitialP(self)
             init_p = self.ambiguity_set.getInitialP();
         end
-        function [next_p, secon_grad, secon_cost] = projectP(self, prox_param, prox_center, indi_cost, pis)
-            [next_p, secon_cost] = self.ambiguity_set.projectP(prox_param, prox_center, indi_cost);
+        function [next_p, secon_grad, secon_cost, dist_est] = projectP(self, prox_param, prox_center, indi_cost, pis)
+            if prox_param == 0
+                [secon_cost, next_p, dist_est] = self.solveForP(indi_cost);
+            else
+                [next_p, secon_cost, dist_est] = self.ambiguity_set.projectP(prox_param, prox_center, indi_cost);
+            end
+            
+
             n1 = length(self.c);
             second_stage_grad = zeros(n1, 1);
             for ind = 1: self.k
@@ -271,8 +282,8 @@ classdef LinearProblem < Problem.ProblemDataInterface
         end
 
         
-        function [total_cost, p] = solveForP(self, individual_costs)
-            [total_cost, p] = self.ambiguity_set.solveForP(individual_costs);
+        function [total_cost, p, dist_est] = solveForP(self, individual_costs)
+            [total_cost, p, dist_est] = self.ambiguity_set.solveForP(individual_costs);
         end
         
         function [omega_p2, ratio, A, cp] = getProbParamEstimate(self)

@@ -18,24 +18,24 @@ classdef RatioAmbiguitySet < Problem.ProbabilityAmbiguitySet
     methods
         function self = RatioAmbiguitySet(projector_name)
             self.ambiguity_name = ['Ratio ', projector_name];
-            if projector_name == "Entropy"
-                self.p_projector = Helper.EntropyProjector();
-                self.is_entropy = true;
-            elseif projector_name == "Euclidean"
-                self.p_projector = Helper.EuclideanProjector();
-            elseif projector_name == "BoxEntropy"
+            % if projector_name == "Entropy"
+            %     self.p_projector = Helper.EntropyProjector();
+            %     self.is_entropy = true;
+            % elseif projector_name == "Euclidean"
+            %     self.p_projector = Helper.EuclideanProjector();
+            if strcmp(projector_name, "Entropy")
                 self.box_projector = Helper.BoxPProjector.VectorBoxPEntropyProjector();
                 self.box_projector_flag = true;
                 self.is_entropy = true;
                 self.p_projector = Helper.EntropyProjector();
                 DELTA = 1e-16;
                 self.distance_handle = @(x, y) sum((y + DELTA).* (log(y + DELTA) - log(x + DELTA)));
-            elseif projector_name == "BoxEuclidean"
+            elseif strcmp(projector_name ,"Euclidean")
                 self.box_projector = Helper.BoxPProjector.VectorBoxPEuclideanProjector();
                 self.p_projector = Helper.EuclideanProjector();
                 self.box_projector_flag = true;
             else
-                error('Please choose projector from " Euclidean| BoxEntropy| BoxEuclidean"');
+                error('Please choose projector from " Euclidean| Entropy"');
             end
         end
 
@@ -87,7 +87,7 @@ classdef RatioAmbiguitySet < Problem.ProbabilityAmbiguitySet
             init_p = self.reference_p;
         end
 
-        function [total_cost, p] = solveForP(self, individual_costs)
+        function [total_cost, p, dist_est] = solveForP(self, individual_costs)
             if self.alpha == 1
                 p = self.reference_p;
                 total_cost = p' * individual_costs;
@@ -97,9 +97,10 @@ classdef RatioAmbiguitySet < Problem.ProbabilityAmbiguitySet
             % full(self.p_projector.model.A)%TODO
             [total_cost, p] = self.p_projector.solve(-individual_costs);%%%%%%%%%%%%%%%%%%%%
             total_cost = - total_cost;
+            dist_est = self.distance_handle(self.reference_p, p);
         end
         
-        function [next_p, secon_cost] = projectP(self, prox_param, prox_center, indi_costs)
+        function [next_p, secon_cost, dist_est] = projectP(self, prox_param, prox_center, indi_costs)
             if self.alpha == 1
                 next_p = self.reference_p;
                 neg_secon_cost = -next_p' * indi_costs;
@@ -111,6 +112,7 @@ classdef RatioAmbiguitySet < Problem.ProbabilityAmbiguitySet
                 end
             end
             secon_cost = - neg_secon_cost;
+            dist_est = self.distance_handle(self.reference_p, next_p);
         end
         function flag = isEntropy(self)
             flag = self.is_entropy;
