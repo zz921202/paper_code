@@ -85,10 +85,10 @@ classdef TransportUncertainty < Problem.ProbabilityAmbiguitySet
             [~, P1] = self.solveForP(ascending_vec);
             [~, P2] = self.solveForP(-ascending_vec);
             p1 = sum(P1, 2); p2 = sum(P2, 2);
-            omega_p2 = max(self.distance_handle(P1, P2), self.vec_distance_handle(P2, P1)) * self.amplify_prox_param_ratio;
-            max_ratio = max(max((p1 - p2) ./ p2), max((p2 -p1) ./ p1));
+            omega_p2 = max(self.distance_handle(P1, P2), self.distance_handle(P2, P1)) * self.amplify_prox_param_ratio * 2;
+            max_ratio = max(max((p1 - p2) ./ max(p2, ones(self.k, 1) ./ self.k ./ 100), max(p2, ones(self.k, 1) ./ self.k ./ 100)));
             ratio = min(max_ratio, self.CUTOFF);
-            max_A = max(max(p1), max(p2));
+            max_A = max(max(p1), max(p2)) * self.k;
             A = min(max_A, sqrt(self.CUTOFF));
         end
 
@@ -102,7 +102,7 @@ classdef TransportUncertainty < Problem.ProbabilityAmbiguitySet
         function self = generateData(self, k)
             self.reference_p = ones(k, 1) ./ k;
             self.k = k;
-%             self.distance_table = self.problem_data.getDistanceTable();
+            self.distance_table = self.problem_data.getDistanceTable();
             self.prev_p_table = ones(self.k, self.k) ./k^2;
             
 

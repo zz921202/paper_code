@@ -5,7 +5,7 @@ classdef DynamicNestrov < Algorithm.NestrovTypeAlgorithm
         % omega_pi_ratios = 3.^(-4:1);%[ 1e-2, 1e-3, 1e-1];
         omega_pi_ratios = 10 .^ (-4:0);
         % omega_x_ratios = [1];
-        omega_x_ratios = 10.^(-1:1);%[1e-1, 1e-2, 1e-3];
+        omega_x_ratios = 10.^(-2:1);%[1e-1, 1e-2, 1e-3];
         MAXITER;
     end
     methods

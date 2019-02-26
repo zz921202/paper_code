@@ -1,86 +1,70 @@
-% testing euclidean projector 
+% this file tests all algorithms by iteration number 
 
 
-% c = [1;1];
-% A = [2, 1];
-% b = [3];
-% x_pre = [5; 5];
 
-% eu_projector = Helper.EuclideanProjector();
-% eu_projector.setConstraint(A, b);
-% [val, soln]= eu_projector.solve(c);
-% [soln, obj] = eu_projector.project(1, x_pre, c);
-
-% A = [1];
-% b = -3;
-% x_pre = 1;
-% c = 1;
-% eu_projector = Helper.EntropyProjector();
-% eu_projector.setConstraint(A, b);
-% [soln, obj] = eu_projector.project(1, x_pre, c)
-% model = eu_projector.model
-
-k = 6;
-n = 10;
-m = 5;
-
-pis = {};
-for i = 1: k
-    pis = [pis, ones(m,1)];
-end
-
-indi_costs = zeros(k, 1);
-indi_costs(1) = 1;
-mat_gen = DataGenerator.SimpleCompleteRecourseRandomData(m,n);
-
-ref_problem = Problem.LinearRatioUncertainty(mat_gen,  'Euclidean');
-ref_problem.alpha = 0.5;%x
-ref_problem.beta = k/2;
-rng(100)
-ref_problem.generateData(k);
-% tic
-% [ref_p, ref_grad, ref_cost] = ref_problem.projectP(1, ones(k,1)/ k, indi_costs, pis)
-% toc
-
-
-% cus_problem = Problem.LinearRatioUncertainty(mat_gen, 'BoxEntropy');
-% % cus_problem.alpha = 0;
-% % cus_problem.beta = k;
-% rng(0)
-% cus_problem.generateData(k);
-% tic
-% [cus_p, cus_grad, cus_cost] = cus_problem.projectP(1, ones(k,1)/ k, indi_costs, pis)
-% toc
-y =[   
-       0.5737
-         0];
+k = 50;
+rng_seed = 100;
+m = 20;
+n = 40;
+dist = 'Euclidean';
+alpha = 0;
+beta =k;
+radius = 5;
+ref_problem = Testing.getRefProblem(n,m, k, alpha, beta, rng_seed, dist)
+% ref_problem = Testing.getRefTransportProblem(n, m, k, rng_seed, dist, radius);
+% ref_problem = Testing.getRefX2(n, m, k, rng_seed, dist, radius);
 
 terminator = Algorithm.Terminator.MaxIterTerminator();
-terminator.MAXITERATION = 100;
-alg_sub = Algorithm.Subgradient(ref_problem, terminator);
-alg_sub.setGridParam(1);
-[x, obj_val, est_gap, true_gap, time_elapsed, num_iters] = alg_sub.run()
 
-figure
 
-plot(alg_sub.obj_history);
-hold on
-title('obj history')
+dsl_type_alg = {@Algorithm.ExperimentDSLAlgorithm, @Algorithm.ABPAlgorithm};
 
-plot([0, length(alg_sub.obj_history)], [ref_problem.opt_val, ref_problem.opt_val], 'r')
-% title('obj history: fixed Nestrov')
-% figure;
-% hold on
-% plot(alg_sub.fake_cost_history);
-% plot(alg_sub.temp_cost_history, 'x');
-% legend('fake cost', 'true cost');
-% figure
+terminator.MAXITERATION = 200
+true_gap_history = [];
+names = {};
+for idx = 1: length(dsl_type_alg)
+    cur_alg_handle = dsl_type_alg{idx};
+    cur_alg = cur_alg_handle(ref_problem, terminator);
+    [cur_x, cur_obj_val, est_gap, true_gap, time_elapsed, num_iters] = cur_alg.run();
+    cur_gap_history = cur_alg.obj_history - ref_problem.opt_val;
+    true_gap_history = [true_gap_history, cur_gap_history];
+    names = [names, cur_alg.getName()];
+end
 
-% plot(alg_sub.dist_to_x_history);
-% title('dist to true x');
-[gamma_t_inv, mu_pi_t, mu_p_t, alpha_t] = alg_sub.getProxParams();
-fake_cost_for_opt_x = ref_problem.evalFakeCost(ref_problem.ref_x, mu_p_t, alg_sub.smooth_p, mu_pi_t, alg_sub.smooth_pis)
-fake_cost_for_sol =  ref_problem.evalFakeCost(x, mu_p_t, alg_sub.smooth_p, mu_pi_t, alg_sub.smooth_pis)
-% figure
-% plot(alg_sub.x_history(:, 100:200)', '-x');
-% legend('1', '2', '3', '4', '5', '6');
+fo_type_alg = { @Algorithm.PDDAlgorithm, @Algorithm.PDHGAlgorithm, @Algorithm.DynamicNestrov}
+
+for idx = 1: length(fo_type_alg)
+    terminator.MAXITERATION = 50;
+    cur_alg_handle = fo_type_alg{idx};
+    alg = cur_alg_handle(ref_problem, terminator);
+    best_val = Inf;
+    best_gap = Inf;
+    best_ind = 0;
+    ind = 0;
+    % alg.setGridParam(ind+1)
+    while alg.nextGridParam()
+        ind  = ind + 1;
+        disp(alg.showGridParam(ind));
+        % alg.setGridParam(ind);
+        [cur_x, cur_obj_val, est_gap, true_gap, time_elapsed, num_iters] = alg.run();
+        fprintf('%s th parameter choice with obj_val%s and gap %s\n', num2str(ind), num2str(cur_obj_val), num2str(true_gap));
+        if cur_obj_val < best_val
+            best_val = cur_obj_val;
+            best_gap = true_gap;
+            best_ind = ind;
+        end
+    end
+    terminator.MAXITERATION = 200;
+    alg.showGridParam(best_ind);
+    alg.setGridParam(best_ind);
+
+    [cur_x, cur_obj_val, est_gap, true_gap, time_elapsed, num_iters] = alg.run()
+    cur_gap_history = alg.obj_history - ref_problem.opt_val;
+    true_gap_history = [true_gap_history, cur_gap_history];
+    names = [names, alg.getName()];
+end
+
+figure 
+semilogy(true_gap_history, 'LineWidth',8);
+legend(names{:});
+title(sprintf('m = %d, n = %d, k =%d, radius %s, objval=%s', m,n,k,num2str(radius), num2str(ref_problem.opt_val)));

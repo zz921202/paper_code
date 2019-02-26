@@ -1,7 +1,7 @@
 classdef PDHGAlgorithm < Algorithm.FOAlgorithm 
 properties
-    etas = 3 .^ (0:5);
-    taus = 3 .^ (0:5);
+    etas = 10 .^ (-4:3);
+    taus = 10 .^ (-4:3);
     cur_eta;
     cur_tau;
     phi = 1;

@@ -5,6 +5,7 @@ classdef ToyLinearProblem < Problem.LinearProblem
             self@Problem.LinearProblem(data_generator, ambiguity_set);
         end
 
+
     end
 
     methods(Access = protected)
@@ -28,6 +29,26 @@ classdef ToyLinearProblem < Problem.LinearProblem
 
             self.x_projector.setConstraint(Aplus, bplus);
         end
+
+
+        function setUpZProjectors(self, c, A, b, Wks, Tks, dks, eks, k)
+            n1 = self.n1; n2 = self.n2; m1 = self.m1; m2 = self.m2; 
+            z_projectors = {};               
+            for ind = 1:k
+                cur_z_projector = self.EuclideanProjectorHandle();
+                obj_cons = [1, -c', -(eks{ind})'];
+                scen_cons_pos = [zeros(m2, 1), -Tks{ind}, Wks{ind}];
+                scen_cons_neg = [zeros(m2, 1), Tks{ind}, -Wks{ind}];
+                % fir_cons = [zeros(m1, 1), A, zeros(m1, n2)];
+                non_neg_x = [zeros(n1, 1), eye(n1), zeros(n1, n2)];
+                non_neg_y = [zeros(n2, 1), zeros(n2, n1), eye(n2)];
+                lhs_cons = [obj_cons; scen_cons_pos; scen_cons_neg; non_neg_x; non_neg_y];
+                rhs_cons = [0; dks{ind}; -dks{ind};  zeros(n1+n2, 1)];
+                cur_z_projector.setConstraint(lhs_cons, rhs_cons);
+                self.z_projectors = [self.z_projectors; cur_z_projector];
+            end
+        end
+
     end
 
 end

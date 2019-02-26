@@ -32,17 +32,19 @@ classdef X2Uncertainty < Problem.ProbabilityAmbiguitySet
             if self.is_entropy
                 cp = sqrt(self.k);
             end
-            [~, p1] = self.solveForP(ascending_vec);
-            [~, p2] = self.solveForP(-ascending_vec);
-            omega_p2 = self.distance_handle(p1 - p2);
-            ratio = (p1(1) - p2(1))/ p2(1);
-            ratio = min(ratio, seld.CUTOFF);
+            ascending_vec = (1: self.k)';
+            [~, p1] = self.solveForP(-ascending_vec);
+            [~, p2] = self.solveForP(ascending_vec);
+            omega_p2 = self.distance_handle(p1, p2);
+            ratio = (p1(1) - p2(1))/ max(p2(1), 1/k *.01);
+            ratio = min(ratio, self.CUTOFF);
             A = min(sqrt(self.CUTOFF), p1(1) * self.k);
         end
 
         function self = setProblem(self, problemData)
             self.problem_data = problemData;
         end
+
         function self = generateData(self, k)
             self.k = k;
             self.reference_p = ones(k, 1) ./ k;
@@ -65,6 +67,7 @@ classdef X2Uncertainty < Problem.ProbabilityAmbiguitySet
         end
 
         function [total_cost, p, p_radius2] = solveForP(self, individual_costs)
+            % individual_costs
             closed_form_solver_handle = @(lambda) self.computeLP(lambda, -individual_costs);
             [p, ~] = self.searchLambda(self.lp_searcher, closed_form_solver_handle);
             total_cost = p' * individual_costs;
@@ -131,6 +134,8 @@ classdef X2Uncertainty < Problem.ProbabilityAmbiguitySet
         end
 
         function next_p = computeLP(self, lambda, grad)
+            % lambda 
+            % grad
             [next_p, ~] = self.eu_projector.project(2 * lambda, self.reference_p, grad);
         end
     end

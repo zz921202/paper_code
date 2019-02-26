@@ -166,6 +166,7 @@ classdef LinearProblem < Problem.ProblemDataInterface
             
             cur_projector = self.z_projectors(ind);
             total_len = 1 + self.n1 + self.n2;
+            
             [next_z, ~]= cur_projector.project(1, z_center, zeros(total_len, 1));
             next_sigma = next_z(1);
             next_x = next_z(2: (1+ self.n1));

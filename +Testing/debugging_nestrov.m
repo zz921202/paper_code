@@ -1,11 +1,11 @@
 k = 10;
-rng_seed = 100;
+rng_seed = 200;
 m = 20;
 n = 40;
-dist = 'BoxEntropy';
+dist = 'Euclidean';
 alpha = 0;
 beta =k;
-ref_problem = Testing.getRefProblem(n,m, k, alpha, beta, rng_seed, dist)
+% ref_problem = Testing.getRefProblem(n,m, k, alpha, beta, rng_seed, dist)
 % tic
 % [ref_p, ref_grad, ref_cost] = ref_problem.projectP(1, ones(k,1)/ k, indi_costs, pis)
 % toc
@@ -24,7 +24,7 @@ ref_problem = Testing.getRefProblem(n,m, k, alpha, beta, rng_seed, dist)
 %          0];
 
 terminator = Algorithm.Terminator.MaxIterTerminator();
-terminator.MAXITERATION = 20;
+terminator.MAXITERATION = 50;
 alg = Algorithm.DynamicNestrov(ref_problem, terminator);
 % alg.setGridParam(1);
 best_val = Inf;

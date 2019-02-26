@@ -71,7 +71,7 @@ classdef RatioAmbiguitySet < Problem.ProbabilityAmbiguitySet
                 error('Unknown p_projector, please compute cp beforehand');
             end
 
-            ratio = (self.beta - self.alpha) / self.alpha;
+            ratio = (self.beta - self.alpha) / max(self.alpha, 0.01);
             ratio = min(ratio, 5000);
             A = min(self.beta, self.k);
             A = min(A, sqrt(5000));

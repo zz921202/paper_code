@@ -1,11 +1,14 @@
-k = 100;
-rng_seed = 116;
+k = 20;
+rng_seed = 200;
 m = 20;
 n = 40;
-dist = 'BoxEntropy';
-alpha = 1/100;
+dist = 'Euclidean';
+alpha = 0;
 beta =k;
-ref_problem = Testing.getRefProblem(n,m, k, alpha, beta, rng_seed, dist)
+radius = 0.1;
+% ref_problem = Testing.getRefProblem(n,m, k, alpha, beta, rng_seed, dist)
+% ref_problem = Testing.getRefTransportProblem(n, m, k, rng_seed, dist, radius);
+ref_problem = Testing.getRefX2(n, m, k, rng_seed, dist, radius);
 
 terminator = Algorithm.Terminator.MaxIterTerminator();
 terminator.MAXITERATION = 20;
