@@ -21,6 +21,7 @@ classdef ABPAlgorithm < Algorithm.DSLAlgorithm
                 x_tl = (1 - alpha_t) * self.cur_x + alpha_t * x_t;
                 % smooth_pis = self.smooth_pis
                 % phase_mu_pi = self.phase_mu_pi
+                self.cur_est_gap = cur_upper - cur_lower;
 %                 self.phase_mu_pi
                 [cur_pis, indi_costs] = self.problem_data.projectPis(self.phase_mu_pi, self.smooth_pis, x_tl);
                 % phase_mu_p = self.phase_mu_p

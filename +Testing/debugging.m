@@ -2,7 +2,7 @@
 
 
 
-k = 5;
+k = 1;
 rng_seed = 100;
 m = 20;
 n = 40;
@@ -16,13 +16,18 @@ radius = 5;
 
 ref_problem = Testing.getRefSSN(n,m, k, alpha, beta, rng_seed, dist)
 
-terminator = Algorithm.Terminator.MaxIterTerminator();
+
 
 
 dsl_type_alg = {@Algorithm.ExperimentDSLAlgorithm, @Algorithm.ABPAlgorithm};
 
-terminator.MAXITERATION = 200
-true_gap_history = [];
+
+max_iter_terminator1 = Algorithm.Terminator.MaxIterTerminator();
+est_gap_teminator1 = Algorithm.Terminator.EstGapTerminator();
+
+max_iter_terminator1.MAXITERATION = 200;
+terminator = Algorithm.Terminator.CompositeTerminator({max_iter_terminator1, est_gap_teminator1})
+true_gap_history = {};
 names = {};
 for idx = 1: length(dsl_type_alg)
     cur_alg_handle = dsl_type_alg{idx};
@@ -36,7 +41,7 @@ end
 fo_type_alg = { @Algorithm.PDDAlgorithm, @Algorithm.PDHGAlgorithm, @Algorithm.DynamicNestrov}
 
 for idx = 1: length(fo_type_alg)
-    terminator.MAXITERATION = 50;
+    max_iter_terminator1.MAXITERATION = 50;
     cur_alg_handle = fo_type_alg{idx};
     alg = cur_alg_handle(ref_problem, terminator);
     best_val = Inf;
@@ -56,7 +61,7 @@ for idx = 1: length(fo_type_alg)
             best_ind = ind;
         end
     end
-    terminator.MAXITERATION = 200;
+    max_iter_terminator1.MAXITERATION = 200;
     alg.showGridParam(best_ind);
     alg.setGridParam(best_ind);
 

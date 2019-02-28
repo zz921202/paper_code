@@ -95,8 +95,10 @@ classdef ExperimentDSLAlgorithm < Algorithm.FOAlgorithm
             while ~self.terminator.terminate()
                 self.mytimer.start()
                 self.cur_est_gap = cur_upper - cur_lower;
+                % cur_est_gap = cur_upper - cur_lower
                 alpha_t = 2 / (t+1);
                 x_tl = (1 - alpha_t) * self.cur_x + alpha_t * x_t;
+                cur_est_gap = cur_upper - cur_lower;
 %                 self.phase_mu_pi
                 [pisl, indi_costs] = self.problem_data.projectPis(self.phase_mu_pi, self.smooth_pis, x_tl);
                 [pl, secon_grad, secon_costs, dist_est_pl] = self.problem_data.projectP(self.phase_mu_p, self.smooth_p, indi_costs, pisl);
