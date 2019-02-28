@@ -2,17 +2,19 @@
 
 
 
-k = 50;
+k = 5;
 rng_seed = 100;
 m = 20;
 n = 40;
 dist = 'Euclidean';
-alpha = 0;
-beta =k;
+alpha = 1;
+beta =1;
 radius = 5;
-ref_problem = Testing.getRefProblem(n,m, k, alpha, beta, rng_seed, dist)
+% ref_problem = Testing.getRefProblem(n,m, k, alpha, beta, rng_seed, dist)
 % ref_problem = Testing.getRefTransportProblem(n, m, k, rng_seed, dist, radius);
 % ref_problem = Testing.getRefX2(n, m, k, rng_seed, dist, radius);
+
+ref_problem = Testing.getRefSSN(n,m, k, alpha, beta, rng_seed, dist)
 
 terminator = Algorithm.Terminator.MaxIterTerminator();
 

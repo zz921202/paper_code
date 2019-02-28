@@ -34,6 +34,23 @@ classdef DataGeneratorInterface < handle
             largest_eig = norm(mat); 
         end
 
+        function radius2 = getRadius2Estimate(self, A, b)
+            solver = Helper.EuclideanProjector();
+            [~, n] = size(A);
+            testing_vec1 = -(1:n)';
+            testing_vec2 = - testing_vec1;
+            solver.setConstraint(A, b);
+            [~, ext_1] = solver.solve(testing_vec1);
+            
+            [~, ext_2] = solver.solve(testing_vec2);
+            radius2 = norm(ext_1- ext_2 )^2 * 4;
+        end
+
+
+        function val = getEigEstimate(self, mat)
+            [~,S,~] = svd(full(mat));
+            val = S(1, 1);
+        end
     
          function vec = genVector(self, m, start_value, end_value) 
             vec = rand(m, 1) * (end_value - start_value) + start_value;

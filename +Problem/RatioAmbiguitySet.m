@@ -91,6 +91,7 @@ classdef RatioAmbiguitySet < Problem.ProbabilityAmbiguitySet
             if self.alpha == 1
                 p = self.reference_p;
                 total_cost = p' * individual_costs;
+                dist_est = 0;
                 return
             end
             % individual_costs
