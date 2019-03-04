@@ -78,14 +78,29 @@ classdef LinearProblem < Problem.ProblemDataInterface
         function [next_pis, indi_costs] = projectPis(self, prox_param, prox_centers, x)
             %   returns all pis
             next_pis = {};
-            indi_costs = [];
+            indi_costs = zeros(self.k, 1);
+            
+            pi_projectors = self.pi_projectors;
+            Tks = self.Tks;
+            dks = self.dks;
+            grads = {};
             for ind = 1: self.k
-                cur_grad = self.Tks{ind} * x + self.dks{ind};
-                cur_projector = self.pi_projectors(ind);
-                [cur_next_pi, neg_cost] = cur_projector.project(prox_param, prox_centers{ind}, -cur_grad);%%TODO
-                next_pis = [next_pis, cur_next_pi];
-                indi_costs = [indi_costs; -neg_cost];
+                grads{ind} = self.Tks{ind} * x + self.dks{ind};
             end
+%             cur_projector = pi_projectors(1);
+            % tic
+            % ticBytes(gcp)
+            for ind = 1: self.k
+                cur_projector = pi_projectors(ind);
+                % tic
+                [cur_next_pi, neg_cost] = cur_projector.project(prox_param, prox_centers{ind}, -grads{ind});
+                % toc%%TODO
+                next_pis{ind} = cur_next_pi;
+                indi_costs(ind) =  -neg_cost;
+            end
+            % tocBytes(gcp)
+            % toc
+            
         end
 
         function init_pis = getInitialPis(self)
@@ -121,13 +136,23 @@ classdef LinearProblem < Problem.ProblemDataInterface
         function [indi_costs, pis] = solveForPis(self, x)
             indi_costs = zeros(self.k, 1);
             pis = {};
+
+            pi_projectors = self.pi_projectors;
+            Tks = self.Tks;
+            dks = self.dks;
+            grads = {};
             for ind = 1: self.k
-                cur_pi_projector = self.pi_projectors(ind);
-                grad = self.Tks{ind} * x + self.dks{ind};
-                [neg_cur_cost, cur_pi] = cur_pi_projector.solve(-grad);
-                pis = [pis, cur_pi];
+                grads{ind} = self.Tks{ind} * x + self.dks{ind};
+            end
+            for ind = 1: self.k
+                cur_pi_projector = pi_projectors(ind);
+                [neg_cur_cost, cur_pi] = cur_pi_projector.solve(-grads{ind});
+                pis{ind} = cur_pi;
                 indi_costs(ind) = -neg_cur_cost;
             end
+
+            
+            
         end
 
         function [objective_val, gap] = evalX(self, x)
@@ -173,6 +198,26 @@ classdef LinearProblem < Problem.ProblemDataInterface
             next_y = next_z((2+self.n1):total_len);
         end
 
+        function [next_sigmas, next_xs, next_ys] = projectZs(self, sigmas, xs, ys)
+            % note that sigmas are stored as a double vector
+            z_centers = {};
+            for idx = 1: self.k
+                z_centers{idx} = [sigmas(idx); xs{idx}; ys{idx}];
+            end
+            next_sigmas = zeros(self.k, 1);
+            next_xs ={}; next_ys = {};
+            total_len = 1 + self.n1 + self.n2;
+            z_projectors = self.z_projectors;
+
+            for idx = 1: self.k
+                cur_projector = z_projectors(idx);
+                [next_z, ~]= cur_projector.project(1, z_centers{idx}, zeros(total_len, 1));
+                next_sigmas(idx) = next_z(1);
+                next_xs{idx} = next_z(2: (1+ self.n1));
+                next_ys{idx} = next_z((2+self.n1):total_len);
+            end
+        end
+
         function table = getDistanceTable(self)
             table = zeros(self.k, self.k);
             for i = 1: self.k
@@ -201,6 +246,22 @@ classdef LinearProblem < Problem.ProblemDataInterface
             fprintf('omega_x2_ratio is %s', num2str(self.omega_x2 / omega_x2) )
             self.omega_x2 = omega_x2;                            
         end
+               % Make a copy of a handle object.
+        function new = copy(this)
+            % Instantiate new object of the same class.
+            new = Problem.LinearProblem(this.data_generator, this.ambiguity_set);
+ 
+            % Copy all non-hidden properties.
+            p = properties(this);
+            for i = 1:length(p)
+                new.(p{i}) = this.(p{i});
+            end
+        end
+
+       function str = getClassName(self)
+            str = 'GenLin'; 
+       end
+
 
 
     end

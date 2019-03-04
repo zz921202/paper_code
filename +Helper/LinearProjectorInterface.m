@@ -29,6 +29,11 @@ classdef LinearProjectorInterface < handle
             self.model.rhs = b;
             self.model.sense = '>';
         end
+
+        function setUpperLowerBound(self, lb, ub)
+            model.lb = lb;
+            model.ub = ub;
+        end
     end
 
 

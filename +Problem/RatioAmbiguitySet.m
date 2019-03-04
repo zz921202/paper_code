@@ -1,13 +1,13 @@
 classdef RatioAmbiguitySet < Problem.ProbabilityAmbiguitySet
     properties
-        alpha = 0.9;
-        beta = 1.1;
+        % alpha = 0.9;
+        % beta = 1.1;
         reference_p = [];
         omega_p2;
         box_projector = false;
         box_projector_flag = false;
         distance_handle = @(x, y) norm(x-y, 2)^2;
-        problem_data;        
+%         problem_data;        
         ambiguity_name = '';
         p_projector;        
         k;
@@ -60,7 +60,11 @@ classdef RatioAmbiguitySet < Problem.ProbabilityAmbiguitySet
         function str = getName(self)
             str = self.ambiguity_name;
 
-        end
+       end
+
+       function str = getInfo(self)
+            str = sprintf('Ratio al %s be %s', num2str(self.alpha), num2str(self.radius));
+       end
 
         function [omega_p2, ratio, A, cp] = getProbParamEstimate(self)
             if strcmp(self.p_projector.getDistanceName(), 'Entropy')
@@ -96,6 +100,7 @@ classdef RatioAmbiguitySet < Problem.ProbabilityAmbiguitySet
             end
             % individual_costs
             % full(self.p_projector.model.A)%TODO
+%             individual_costs
             [total_cost, p] = self.p_projector.solve(-individual_costs);%%%%%%%%%%%%%%%%%%%%
             total_cost = - total_cost;
             dist_est = self.distance_handle(self.reference_p, p);

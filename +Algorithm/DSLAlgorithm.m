@@ -29,7 +29,7 @@ classdef DSLAlgorithm < Algorithm.FOAlgorithm
     methods
         
         function setGridParam(self, index)
-            self.cur_p_estimate = sqrt(self.est_p_breg_dist) * self.omega_p_ratios(index);
+            % self.cur_p_estimate = sqrt(self.est_p_breg_dist) * self.omega_p_ratios(index);
         end
         % disp parameter choice in words
         % just call showGridParam 
@@ -37,6 +37,11 @@ classdef DSLAlgorithm < Algorithm.FOAlgorithm
             % fprintf('p ratio is %s\n', num2str(self.omega_p_ratios(index)));
             str = sprintf('_ %s _', num2str(self.omega_p_ratios(index)));
             
+        end
+
+
+        function startTuning(self) 
+            return;
         end
 
         function [x, obj_val, est_gap, true_gap, time_elapsed, num_iters] = run(self)

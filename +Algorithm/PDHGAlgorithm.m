@@ -1,10 +1,10 @@
 classdef PDHGAlgorithm < Algorithm.FOAlgorithm 
 properties
-    etas = 10 .^ (-4:3);
-    taus = 10 .^ (-4:3);
+    etas = 10 .^ (-10:10);
+    taus = [1];
     cur_eta;
     cur_tau;
-    phi = 1;
+    phi = 1.5;
     ws_history = [];
     x_diff_history = [];
 end
@@ -14,19 +14,19 @@ end
         end
 
         function setGridParam(self, index)
-            num_eta_choices = length(self.taus);
+            num_eta_choices = length(self.etas);
             cur_tau_choice = floor((index - 0.1)/num_eta_choices) + 1;
             cur_eta_choice = index - (cur_tau_choice - 1) * num_eta_choices;
             self.cur_eta = self.etas(cur_eta_choice);
-            self.cur_tau = self.taus(cur_tau_choice);
+            self.cur_tau = 1 ./ self.cur_eta;
         end
 
         function str = showGridParam(self, index)
-            num_eta_choices = length(self.taus);
+            num_eta_choices = length(self.etas);
             cur_tau_choice = floor((index - 0.1)/num_eta_choices) + 1;
             cur_eta_choice = index - (cur_tau_choice - 1) * num_eta_choices;
             cur_eta = self.etas(cur_eta_choice);
-            cur_tau = self.taus(cur_tau_choice);
+            cur_tau = 1 ./ self.cur_eta;
             str = sprintf('%s %s', num2str(cur_tau), num2str(cur_eta));
         end
 
@@ -62,6 +62,9 @@ end
                 %prox step with respect to x
                 % fprintf('iter %d est gap is %s', self.num_iters, num2str(self.cur_est_gap))
                 % disp('helooooooooooo')
+                x_temps = {};
+                y_temps = ys;
+                sigma_temps = zeros(k, 1);
                 for ind = 1 : k
                     pre_ind = ind -1;
                     if ind == 1
@@ -70,12 +73,12 @@ end
 %                     ws{pre_ind}
 
                     end
-                    x_temp = xs{ind} - 1/2 * self.cur_tau *(ws{ind} - ws{pre_ind});
-                    sigma_temp = sigma(ind) - self.cur_tau * p(ind);
-                    y_temp = ys{ind};
-                    [sig_ind, x_ind, y_ind] = self.problem_data.projectZ(sigma_temp, x_temp, y_temp, ind);
-                    sigma_next(ind) = sig_ind; xs_next{ind} = x_ind; ys_next{ind} = y_ind;
+                    x_temps{ind} = xs{ind} - 1/2 * self.cur_tau *(ws{ind} - ws{pre_ind});
+                    sigma_temps(ind) = sigma(ind) - self.cur_tau * p(ind);
                 end
+                    % [sig_ind, x_ind, y_ind] = self.problem_data.projectZ(sigma_temp, x_temp, y_temp, ind);
+                    % sigma_next(ind) = sig_ind; xs_next{ind} = x_ind; ys_next{ind} = y_ind;
+                [sigma_next, xs_next, ys_next] = self.problem_data.projectZs(sigma_temps, x_temps, y_temps);
 
                 % prox step with respect to p
                 % momentum update
@@ -87,7 +90,7 @@ end
                         next_ind = 1;
                     end
                     ws_next{ind} = ws{ind} + self.cur_eta * 1/2 *...
-                     (2*( xs_next{ind} - xs_next{next_ind}) - (xs{ind} - xs{next_ind}));
+                     (( 2 * xs_next{ind} - xs{ind}) - (2 * xs_next{next_ind}- xs{next_ind}));
                 end
 
                 % phi update
@@ -108,7 +111,9 @@ end
             x = self.cur_x; obj_val = self.cur_obj; est_gap = self.cur_est_gap;  true_gap=self.cur_true_gap; time_elapsed=self.time_elapsed; num_iters=self.num_iters;
         end
 
-
+        function flag = solveEntropy(self)
+            flag = false;
+        end
             % just call showGridParam 
             
     end

@@ -1,12 +1,12 @@
-k = 1000;
+k = 100;
 rng_seed = 100;
-m = 100;
-n = 200;
+m = 20;
+n = 40;
 dist = 'Euclidean';
 alpha = 0;
-beta =100;
+beta =k;
 radius = 200;
-% ref_problem = Testing.getRefProblem(n,m, k, alpha, beta, rng_seed, dist)
+ref_problem = Testing.getRefProblem(n,m, k, alpha, beta, rng_seed, dist)
 % ref_problem = Testing.getRefTransportProblem(n, m, k, rng_seed, dist, radius)
 
 mat_gen = DataGenerator.ToyRecourseRandomDataGenerator(m,n);
@@ -22,7 +22,7 @@ max_iter_terminator = Algorithm.Terminator.MaxIterTerminator();
 est_gap_teminator = Algorithm.Terminator.EstGapTerminator();
 
 max_iter_terminator.MAXITERATION = 200;
-terminator = Algorithm.Terminator.CompositeTerminator({max_iter_terminator, est_gap_teminator});
+terminator = Algorithm.Terminator.GapRecorderTerminator(ref_problem.opt_val);
 
 
 max_iter_terminator1 = Algorithm.Terminator.MaxIterTerminator();
@@ -34,42 +34,42 @@ terminator1 = Algorithm.Terminator.CompositeTerminator({max_iter_terminator1, es
 
 alg = Algorithm.ExperimentDSLAlgorithm(ref_problem, terminator);
 % ref_alg = Algorithm.
-ref_alg = Algorithm.ABPAlgorithm(ref_problem, terminator1);
+% ref_alg = Algorithm.ABPAlgorithm(ref_problem, terminator1);
 
-% alg.setGridParam(1);
-best_val = Inf;
-best_gap = Inf;
-best_ind = 1;
-ind = 0
-% while alg.nextGridParam()
-%     ind  = ind + 1;
-%     [cur_x, cur_obj_val, est_gap, true_gap, time_elapsed, num_iters] = alg.run()
-%     if cur_obj_val < best_val
-%         best_val = cur_obj_val;
-%         best_gap = true_gap;
-%         best_ind = ind
-%     end
-% end
+% % alg.setGridParam(1);
+% best_val = Inf;
+% best_gap = Inf;
+% best_ind = 1;
+% ind = 0
+% % while alg.nextGridParam()
+% %     ind  = ind + 1;
+% %     [cur_x, cur_obj_val, est_gap, true_gap, time_elapsed, num_iters] = alg.run()
+% %     if cur_obj_val < best_val
+% %         best_val = cur_obj_val;
+% %         best_gap = true_gap;
+% %         best_ind = ind
+% %     end
+% % end
 
-alg.showGridParam(best_ind);
-alg.setGridParam(best_ind);
+% alg.showGridParam(best_ind);
+% alg.setGridParam(best_ind);
 [cur_x, cur_obj_val, est_gap, true_gap, time_elapsed, num_iters] = alg.run();
-[cur_x, cur_obj_val, est_gap, true_gap, time_elapsed, num_iters] = ref_alg.run();
+% [cur_x, cur_obj_val, est_gap, true_gap, time_elapsed, num_iters] = ref_alg.run();
 
-figure
+% figure
 
-semilogy(alg.obj_history - ref_problem.opt_val);
-hold on
-semilogy(ref_alg.obj_history - ref_problem.opt_val);
-legend('exp', 'ref')
-% plot([0, length(alg.obj_history)], [ref_problem.opt_val, ref_problem.opt_val], 'r')
-title('obj history: DSL')
-figure
-semilogy(alg.gap_history)
-hold on
-semilogy(ref_alg.gap_history)
-legend('exp', 'ref')
-title('gap history: DSL history')
+% semilogy(alg.obj_history - ref_problem.opt_val);
+% hold on
+% semilogy(ref_alg.obj_history - ref_problem.opt_val);
+% legend('exp', 'ref')
+% % plot([0, length(alg.obj_history)], [ref_problem.opt_val, ref_problem.opt_val], 'r')
+% title('obj history: DSL')
+% figure
+% semilogy(alg.gap_history)
+% hold on
+% semilogy(ref_alg.gap_history)
+% legend('exp', 'ref')
+% title('gap history: DSL history')
 
 % alg.bundle.showConstraints();
 % figure

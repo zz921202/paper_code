@@ -49,6 +49,10 @@ classdef ExperimentDSLAlgorithm < Algorithm.FOAlgorithm
             % str = sprintf('_ %s %s', num2str(self.omega_p_ratios(p_index)), num2str(self.OMEGAPIS(pi_index)));
             
         end
+        
+        function startTuning(self) 
+            return;
+        end
 
         function [x, obj_val, est_gap, true_gap, time_elapsed, num_iters] = run(self)
             self.cleanUp()

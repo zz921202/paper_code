@@ -36,6 +36,9 @@ classdef FOAlgorithm < handle
         A;
         prob_ratio;
         dist_to_x_history = [];
+
+        tuning_iter = 50;
+        best_ind = 1;
     end
 
     methods
@@ -109,6 +112,39 @@ classdef FOAlgorithm < handle
             else
                 p_to_pi_ratio = self.cp * sqrt(2) * self.est_pi_breg_dist / sqrt(self.est_p_breg_dist);
             end
+        end
+
+        function setTuningIter(self, tunning_iter)
+            self.tuning_iter = tunning_iter;
+        end
+
+        function startTuning(self)
+            
+            true_terminator = self.terminator;
+            fake_terminator = Algorithm.Terminator.MaxIterTerminator();
+            fake_terminator.MAXITERATION = self.tuning_iter;
+            self.terminator = fake_terminator;
+            fake_terminator.setFOAlgorithm(self);
+            ind = 0;
+            best_val = Inf;
+            while self.nextGridParam()
+                ind  = ind + 1;
+                [cur_x, cur_obj_val, est_gap, true_gap, time_elapsed, num_iters] = self.run();
+                fprintf('tuning %s th parameter choice %s  with obj_val%s and gap %s\n', num2str(ind), self.showGridParam(ind), num2str(cur_obj_val), num2str(true_gap));
+                if cur_obj_val < best_val
+                    best_val = cur_obj_val;
+                    best_gap = true_gap;
+                    best_ind = ind;
+                end
+            end
+            fprintf('finished tuning with best param %d, %s', best_ind, self.showGridParam(ind));
+            self.best_ind = ind;
+            self.setGridParam(best_ind);
+            self.terminator = true_terminator;
+        end
+
+        function flag = solveEntropy(self)
+            flag = true;
         end
 
     end

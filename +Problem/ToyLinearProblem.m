@@ -4,6 +4,10 @@ classdef ToyLinearProblem < Problem.LinearProblem
         function self = ToyLinearProblem(data_generator, ambiguity_set)
             self@Problem.LinearProblem(data_generator, ambiguity_set);
         end
+        
+        function str = getClassName(self)
+            str = 'ToyLin';
+        end
 
 
     end
@@ -48,6 +52,8 @@ classdef ToyLinearProblem < Problem.LinearProblem
                 self.z_projectors = [self.z_projectors; cur_z_projector];
             end
         end
+
+
 
     end
 

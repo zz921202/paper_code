@@ -1,7 +1,7 @@
 classdef TransportUncertainty < Problem.ProbabilityAmbiguitySet
     properties 
         distance_table;
-        epsilon; 
+        % radius; 
         TERMINATIONERR = 1e-4;
         is_entropy;
         projection_searcher= Helper.BinarySearcher();
@@ -12,7 +12,7 @@ classdef TransportUncertainty < Problem.ProbabilityAmbiguitySet
         k;
         reference_p;
         CUTOFF = 5000;
-        problem_data;
+        % problem_data;
         ambiguity_name = '';
         prev_p_table = [];
         eu_projector;
@@ -36,6 +36,10 @@ classdef TransportUncertainty < Problem.ProbabilityAmbiguitySet
             end
 
         end
+
+        function str = getInfo(self)
+            str = sprintf('Transport rad %s', num2str(self.radius));
+       end
 
         function flag = isEntropy(self)
             flag = self.is_entropy;
@@ -92,16 +96,13 @@ classdef TransportUncertainty < Problem.ProbabilityAmbiguitySet
             A = min(max_A, sqrt(self.CUTOFF));
         end
 
-        function self = setProblem(self, problem_data)
-            self.problem_data = problem_data;
-
-        end
 
 
 
         function self = generateData(self, k)
             self.reference_p = ones(k, 1) ./ k;
             self.k = k;
+            self.problem_data
             self.distance_table = self.problem_data.getDistanceTable();
             self.prev_p_table = ones(self.k, self.k) ./k^2;
             
@@ -133,11 +134,11 @@ classdef TransportUncertainty < Problem.ProbabilityAmbiguitySet
 
     methods(Access = private)
         function [Ptable, lambda] = searchLambda(self, binary_searcher, closed_form_solver_handle)
-            % will use binary searcher to search for lambda such that <P, M> <= epsilon 
-            % consider epsilon - <P, M> , which is a monotone non-decreasing function of lambda 
+            % will use binary searcher to search for lambda such that <P, M> <= radius 
+            % consider radius - <P, M> , which is a monotone non-decreasing function of lambda 
             P0 = closed_form_solver_handle(0);
-            epsilon = self.epsilon;
-            if sum(dot(P0, self.distance_table)) <= self.epsilon 
+            radius = self.radius;
+            if sum(dot(P0, self.distance_table)) <= self.radius 
                 Ptable = P0;
                 lambda = 0;
             else
@@ -147,7 +148,7 @@ classdef TransportUncertainty < Problem.ProbabilityAmbiguitySet
                     
                     cur_P = closed_form_solver_handle(cur_lam);
                     transport_cost = sum(dot(cur_P, self.distance_table));
-                    cur_err = epsilon - transport_cost;
+                    cur_err = radius - transport_cost;
 
                     % fprintf('cur_lam %s cur_err is %s\n', num2str(cur_lam), num2str(cur_err));
                     % fprintf('cur_bd %s  <-> %s\n', num2str(self.lp_searcher.cur_lb), num2str(self.lp_searcher.cur_ub));

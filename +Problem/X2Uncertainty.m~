@@ -84,7 +84,7 @@ classdef X2Uncertainty < Problem.ProbabilityAmbiguitySet
         end
 
         function str = getInfo(self)
-            str = sprintf('X2 rad %s', num2str(self.radius));
+            str = sprintf('X2 rad', num2str(self.radius));
        end
 
 

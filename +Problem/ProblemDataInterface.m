@@ -12,6 +12,13 @@ classdef ProblemDataInterface < handle
         ref_x;
     end
 
+    methods
+         function str = getInfo(self)
+            str = sprintf('%s, k %s, n %d %d, m %d %d', self.getClassName(),self.k, self.n1, self.n2, self.m1, self.m2 );
+        end
+
+    end
+
     methods(Abstract)
         %% handles projection grad 
         [next_x, total_cost] = projectX(self, prox_param, prox_center, secon_grad)
@@ -52,5 +59,6 @@ classdef ProblemDataInterface < handle
         % getPRatio(self)
         [table] = getDistanceTable(self)
         flag = isEntropy(self)
+        str = getClassName(self)
     end
 end

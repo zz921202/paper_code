@@ -1,14 +1,14 @@
-k = 10;
+k = 4;
 rng_seed = 100;
-m = 20;
-n = 40;
+m = 2;
+n = 4;
 dist = 'Euclidean';
 alpha = 0;
 beta =k;
 ref_problem = Testing.getRefProblem(n,m, k, alpha, beta, rng_seed, dist)
 
 terminator = Algorithm.Terminator.MaxIterTerminator();
-terminator.MAXITERATION = 20;
+terminator.MAXITERATION = 200;
 alg = Algorithm.PDHGAlgorithm(ref_problem, terminator);
 
 
@@ -36,7 +36,7 @@ while alg.nextGridParam()
         fprintf('%s, numerically unstable', alg.showGridParam(ind));
     end
 end
-terminator.MAXITERATION = 200;
+terminator.MAXITERATION = 1000;
 alg = Algorithm.PDHGAlgorithm(ref_problem, terminator);
 alg.showGridParam(best_ind);
 alg.setGridParam(best_ind);
@@ -49,14 +49,14 @@ semilogy(alg.obj_history - ref_problem.opt_val);
 % hold on
 
 % plot([0, length(alg.obj_history)], [ref_problem.opt_val, ref_problem.opt_val], 'r')
-title('obj history: PDHG')
+title('tunting at 50 obj history: PDHG')
 
 figure 
-plot(alg.x_diff_history);
+semilogy(alg.x_diff_history);
 title('x diff')
 
 figure
-plot(alg.ws_history');
+semilogy(alg.ws_history');
 title('ws history')
 
 % figure

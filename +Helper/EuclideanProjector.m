@@ -14,7 +14,8 @@ classdef EuclideanProjector < Helper.LinearProjectorInterface
                 self.modelq.obj = grad - prox_param * prox_center;
                 self.modelq.Q =  sparse( 1/2 * prox_param * eye(self.n) );
                 params.outputflag = 0; 
-                
+%                 grad
+%                 grad - prox_param * prox_center
                 res = gurobi(self.modelq, params);
                 soln = res.x;
                 obj = res.objval + 1/2 * prox_param * (prox_center)' * prox_center;

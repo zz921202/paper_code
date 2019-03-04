@@ -13,7 +13,7 @@ classdef SingleRandomProblem < Testing.SingleProblemInterface
         problem_handle;
         data_gen;
         problem_str;
-        data_generator;
+        data_generator
     end
 
     methods
@@ -26,8 +26,8 @@ classdef SingleRandomProblem < Testing.SingleProblemInterface
             eu_set = self.ambiguity_set_handle('Euclidean');
             en_set = self.ambiguity_set_handle('Entropy');
             
-            eu_problem = Problem.ToyLinearProblem(self.data_generator,  eu_set);
-            eu_set.setProblem(eu_problem);
+            eu_problem = Problem.ToyLinearProblem(mat_gen,  eu_set);
+            
             % ref_problem.alpha = self.alpha;
             % ref_problem.beta = self.beta;
             eu_set.alpha = self.alpha; eu_set.beta= self.beta; eu_set.radius = self.radius;
@@ -35,10 +35,9 @@ classdef SingleRandomProblem < Testing.SingleProblemInterface
             eu_problem.generateData(self.num_scenarios);
             en_problem = eu_problem.copy();
             en_set.alpha = self.alpha; en_set.beta= self.beta; en_set.radius = self.radius;
-            en_set.setProblem(en_problem);
             en_set.generateData(self.num_scenarios);
             en_problem.ambiguity_set = en_set;
-            self.problem_str = [eu_problem.getInfo(),',', eu_set.getInfo()];
+            self.problem_str = [eu_problem.getInfo(), eu_set.getInfo()];
             % ref_problem
         end
 

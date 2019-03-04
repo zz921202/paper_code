@@ -1,17 +1,18 @@
-k = 20;
-rng_seed = 200;
-m = 20;
-n = 40;
+k = 4;
+rng_seed = 100;
+m = 2;
+n = 4;
 dist = 'Euclidean';
 alpha = 0;
 beta =k;
 radius = 0.1;
-% ref_problem = Testing.getRefProblem(n,m, k, alpha, beta, rng_seed, dist)
+ref_problem = Testing.getRefProblem(n,m, k, alpha, beta, rng_seed, dist)
 % ref_problem = Testing.getRefTransportProblem(n, m, k, rng_seed, dist, radius);
-ref_problem = Testing.getRefX2(n, m, k, rng_seed, dist, radius);
+% ref_problem = Testing.getRefX2(n, m, k, rng_seed, dist, radius);
 
 terminator = Algorithm.Terminator.MaxIterTerminator();
-terminator.MAXITERATION = 20;
+terminator.MAXITERATION = 200;
+% terminator = Algorithm.Terminator.GapRecorderTerminator(ref_problem.opt_val);
 alg = Algorithm.PDDAlgorithm(ref_problem, terminator);
 
 
@@ -20,7 +21,7 @@ best_val = Inf;
 best_gap = Inf;
 best_ind = 0;
 ind = 0;
-% alg.setGridParam(ind+1)
+alg.setGridParam(ind+1)
 while alg.nextGridParam()
     ind  = ind + 1;
     disp(alg.showGridParam(ind));
@@ -33,8 +34,11 @@ while alg.nextGridParam()
         best_ind = ind;
     end
 end
-terminator.MAXITERATION = 200;
+terminator.MAXITERATION = 1000;
+
+
 alg = Algorithm.PDDAlgorithm(ref_problem, terminator);
+% alg.startTuning();
 alg.showGridParam(best_ind);
 alg.setGridParam(best_ind);
 
