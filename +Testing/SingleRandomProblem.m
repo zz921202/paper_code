@@ -14,32 +14,38 @@ classdef SingleRandomProblem < Testing.SingleProblemInterface
         data_gen;
         problem_str;
         data_generator;
+        eu_problem = [];
+        en_problem;
     end
 
     methods
         function [eu_problem, en_problem] = generateData(self) % generate a Problem Data to put inside 
             % mat_gen = DataGenerator.SimpleCompleteRecourseRandomData(self.num_rows, self.num_rows * 2); 
             
-            % ambiguity_set = Problem.RatioAmbiguitySet(self.b
-            % ambiguity_set.alpha = self.alpha;
-            % ambiguity_set.beta = self.beta;
-            eu_set = self.ambiguity_set_handle('Euclidean');
-            en_set = self.ambiguity_set_handle('Entropy');
-            
-            eu_problem = Problem.ToyLinearProblem(self.data_generator,  eu_set);
-            eu_set.setProblem(eu_problem);
-            % ref_problem.alpha = self.alpha;
-            % ref_problem.beta = self.beta;
-            eu_set.alpha = self.alpha; eu_set.beta= self.beta; eu_set.radius = self.radius;
-            rng(self.rng_seed);
-            eu_problem.generateData(self.num_scenarios);
-            en_problem = eu_problem.copy();
-            en_set.alpha = self.alpha; en_set.beta= self.beta; en_set.radius = self.radius;
-            en_set.setProblem(en_problem);
-            en_set.generateData(self.num_scenarios);
-            en_problem.ambiguity_set = en_set;
-            self.problem_str = [eu_problem.getInfo(),',', eu_set.getInfo()];
-            % ref_problem
+            if isempty(self.eu_problem)
+                eu_set = self.ambiguity_set_handle('Euclidean');
+                en_set = self.ambiguity_set_handle('Entropy');
+
+                eu_problem = self.problem_handle(self.data_generator,  eu_set);
+                eu_set.setProblem(eu_problem);
+                % ref_problem.alpha = self.alpha;
+                % ref_problem.beta = self.beta;
+                eu_set.alpha = self.alpha; eu_set.beta= self.beta; eu_set.radius = self.radius;
+                rng(self.rng_seed);
+                eu_problem.generateData(self.num_scenarios);
+                en_problem = eu_problem.copy();
+                en_set.alpha = self.alpha; en_set.beta= self.beta; en_set.radius = self.radius;
+                en_set.setProblem(en_problem);
+                en_set.generateData(self.num_scenarios);
+                en_problem.ambiguity_set = en_set;
+                self.eu_problem = eu_problem;
+                self.en_problem = en_problem;
+                self.problem_str = [eu_problem.getInfo(),',', eu_set.getInfo()];
+                eu_problem%TODO
+                eu_problem.getInfo()
+            else
+                eu_problem = self.eu_problem; en_problem = self.en_problem;
+            end
         end
 
         function self =  SingleRandomProblem(problem_handle, data_generator, ambiguity_set_handle)
@@ -48,6 +54,8 @@ classdef SingleRandomProblem < Testing.SingleProblemInterface
             self.data_generator = data_generator;
             self.problem_handle = problem_handle;
         end
+        
+
 
         % function terminator = getTerminator(self) 
         %     max_iter_terminator = Algorithm.Terminator.MaxIterTerminator();

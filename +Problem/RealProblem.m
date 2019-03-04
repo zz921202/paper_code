@@ -31,7 +31,11 @@ classdef RealProblem < Problem.LinearProblem
         % tocBytes(gcp)
         % toc
 
-    end
+       end
+    
+        function str = getClassName(self)
+            str = 'SSN';
+        end
 
 
 
@@ -79,15 +83,13 @@ classdef RealProblem < Problem.LinearProblem
                 lhs_cons = [obj_cons; scen_cons_pos; scen_cons_neg;  non_neg_y];
                 rhs_cons = [0; dks{ind}; -dks{ind};  zeros(n2, 1)];
                 cur_z_projector.setConstraint(lhs_cons, rhs_cons);
-                cur_z_projector.setUpperLowerBound(ub_vec, lb_vec);
+                cur_z_projector.setUpperLowerBound(-ub_vec, ub_vec);
                 self.z_projectors = [self.z_projectors; cur_z_projector];
 
             end
         end
 
-        function str = getClassName(self)
-            str = 'SSN';
-        end
+
 
 
     end

@@ -37,7 +37,8 @@ classdef RealDataGenerator < DataGenerator.DataGeneratorInterface
 
         function [c, A, b, dks, eks, Wks, Tks, Mt, omega_x2, omega_pi2] = generateData(self,k)
              % k is the number of scenarios
-
+             % k
+             % self.k
              if k > self.k
                 error('requesting more scenario %d than existing in the data set %d', k, self.k);
             end
@@ -50,7 +51,7 @@ classdef RealDataGenerator < DataGenerator.DataGeneratorInterface
                 Tks = [Tks, self.T];
                 dks{i} = full(dks{i});
             end
-
+            % dks
             c = self.c; A = self.A; b = self.b;
             Mt = self.Mt; omega_x2 = self.x2; omega_pi2 = self.pi2; 
 

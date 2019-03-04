@@ -76,11 +76,11 @@ classdef NestrovTypeAlgorithm < Algorithm.FOAlgorithm
                     best_val = cur_val;
                 end
                 self.mytimer.pause();
-                fake_cost = self.problem_data.evalFakeCost(cur_x_temp, mu_p_t, smooth_p, mu_pi_t, smooth_pis);
+                % fake_cost = self.problem_data.evalFakeCost(cur_x_temp, mu_p_t, smooth_p, mu_pi_t, smooth_pis);
                 self.recordObjTime();
                 [temp_cost, ~] = self.problem_data.evalX(x_under);
                 self.temp_cost_history = [self.temp_cost_history, temp_cost];
-                self.fake_cost_history = [self.fake_cost_history, fake_cost];
+                % self.fake_cost_history = [self.fake_cost_history, fake_cost];
             end
             x = self.cur_x; obj_val = self.cur_obj; est_gap = self.cur_est_gap;  true_gap=self.cur_true_gap; time_elapsed=self.time_elapsed; num_iters=self.num_iters;
         end

@@ -14,7 +14,8 @@ classdef ProblemDataInterface < handle
 
     methods
          function str = getInfo(self)
-            str = sprintf('%s, k %s, n %d %d, m %d %d', self.getClassName(),self.k, self.n1, self.n2, self.m1, self.m2 );
+            
+            str = sprintf('%s, k %d, n %d %d, m %d %d', self.getClassName(),self.k, self.n1, self.n2, self.m1, self.m2 );
         end
 
     end

@@ -231,9 +231,9 @@ classdef LinearProblem < Problem.ProblemDataInterface
         function optimal_val = getReferenceObjective(self)
                                     
             est_gap_terminator = Algorithm.Terminator.EstGapTerminator();
-            est_gap_terminator.GAP = 1e-3;
+            est_gap_terminator.GAP = 1e-4;%TODO
             max_iter_terminator = Algorithm.Terminator.MaxIterTerminator();
-            max_iter_terminator.MAXITERATION = 500;
+            max_iter_terminator.MAXITERATION = 2000;
             terminator = Algorithm.Terminator.CompositeTerminator({max_iter_terminator, est_gap_terminator});
             self.solver = Algorithm.ABPAlgorithm(self, terminator);
             self.solver.setGridParam(1);

@@ -5,7 +5,7 @@ classdef GapRecorderTerminator < Algorithm.Terminator.TerminatorInterface
         time_elapsed = [];
         iters = [];
         target_val;
-        MAXITER = 5000;
+        MAXITER = 5000; %TODO
     end
 
     methods
